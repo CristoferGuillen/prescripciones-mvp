@@ -1,4 +1,4 @@
-import { PrismaClient, Role, PrescriptionStatus } from '@prisma/client';
+import { PrismaClient, PrescriptionStatus, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -10,7 +10,10 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@test.com' },
-    update: {},
+    update: {
+      name: 'Admin Demo',
+      role: Role.ADMIN,
+    },
     create: {
       email: 'admin@test.com',
       passwordHash: adminPassword,
@@ -21,7 +24,10 @@ async function main() {
 
   const doctorUser = await prisma.user.upsert({
     where: { email: 'doctor@test.com' },
-    update: {},
+    update: {
+      name: 'Dr. Juan Pérez',
+      role: Role.DOCTOR,
+    },
     create: {
       email: 'doctor@test.com',
       passwordHash: doctorPassword,
@@ -32,7 +38,10 @@ async function main() {
 
   const patientUser = await prisma.user.upsert({
     where: { email: 'patient@test.com' },
-    update: {},
+    update: {
+      name: 'Paciente Demo',
+      role: Role.PATIENT,
+    },
     create: {
       email: 'patient@test.com',
       passwordHash: patientPassword,
@@ -43,7 +52,10 @@ async function main() {
 
   const patient2User = await prisma.user.upsert({
     where: { email: 'patient2@test.com' },
-    update: {},
+    update: {
+      name: 'Paciente Dos',
+      role: Role.PATIENT,
+    },
     create: {
       email: 'patient2@test.com',
       passwordHash: patientPassword,
@@ -54,7 +66,9 @@ async function main() {
 
   const doctor = await prisma.doctor.upsert({
     where: { userId: doctorUser.id },
-    update: {},
+    update: {
+      specialty: 'Medicina General',
+    },
     create: {
       userId: doctorUser.id,
       specialty: 'Medicina General',
@@ -63,7 +77,9 @@ async function main() {
 
   const patient = await prisma.patient.upsert({
     where: { userId: patientUser.id },
-    update: {},
+    update: {
+      birthDate: new Date('1995-01-15'),
+    },
     create: {
       userId: patientUser.id,
       birthDate: new Date('1995-01-15'),
@@ -72,71 +88,72 @@ async function main() {
 
   const patient2 = await prisma.patient.upsert({
     where: { userId: patient2User.id },
-    update: {},
+    update: {
+      birthDate: new Date('1998-06-20'),
+    },
     create: {
       userId: patient2User.id,
       birthDate: new Date('1998-06-20'),
     },
   });
 
-  const existingPrescription1 = await prisma.prescription.findUnique({
-    where: { code: 'RX-DEMO-001' },
+  await prisma.prescription.deleteMany({
+    where: {
+      code: {
+        in: ['RX-DEMO-001', 'RX-DEMO-002'],
+      },
+    },
   });
 
-  if (!existingPrescription1) {
-    await prisma.prescription.create({
-      data: {
-        code: 'RX-DEMO-001',
-        status: PrescriptionStatus.PENDING,
-        notes: 'Tomar los medicamentos según indicación médica.',
-        doctorId: doctor.id,
-        patientId: patient.id,
-        items: {
-          create: [
-            {
-              name: 'Paracetamol',
-              dosage: '500 mg',
-              quantity: '10 tabletas',
-              instructions: 'Tomar cada 8 horas por 3 días.',
-            },
-            {
-              name: 'Ibuprofeno',
-              dosage: '400 mg',
-              quantity: '6 tabletas',
-              instructions: 'Tomar solo si hay dolor o inflamación.',
-            },
-          ],
-        },
+  await prisma.prescription.create({
+    data: {
+      code: 'RX-DEMO-001',
+      status: PrescriptionStatus.PENDING,
+      notes: 'Tomar los medicamentos según indicación médica.',
+      doctorId: doctor.id,
+      patientId: patient.id,
+      items: {
+        create: [
+          {
+            medicineName: 'Paracetamol',
+            dosage: '500 mg',
+            frequency: 'Cada 8 horas',
+            duration: '3 días',
+            instructions: 'Tomar después de comer.',
+          },
+          {
+            medicineName: 'Ibuprofeno',
+            dosage: '400 mg',
+            frequency: 'Cada 12 horas',
+            duration: '3 días',
+            instructions: 'Tomar solo si hay dolor o inflamación.',
+          },
+        ],
       },
-    });
-  }
-
-  const existingPrescription2 = await prisma.prescription.findUnique({
-    where: { code: 'RX-DEMO-002' },
+    },
   });
 
-  if (!existingPrescription2) {
-    await prisma.prescription.create({
-      data: {
-        code: 'RX-DEMO-002',
-        status: PrescriptionStatus.CONSUMED,
-        notes: 'Prescripción de ejemplo marcada como consumida.',
-        consumedAt: new Date(),
-        doctorId: doctor.id,
-        patientId: patient2.id,
-        items: {
-          create: [
-            {
-              name: 'Loratadina',
-              dosage: '10 mg',
-              quantity: '5 tabletas',
-              instructions: 'Tomar una vez al día.',
-            },
-          ],
-        },
+  await prisma.prescription.create({
+    data: {
+      code: 'RX-DEMO-002',
+      status: PrescriptionStatus.CONSUMED,
+      notes: 'Prescripción de ejemplo marcada como consumida.',
+      consumedAt: new Date(),
+      doctorId: doctor.id,
+      patientId: patient2.id,
+      items: {
+        create: [
+          {
+            medicineName: 'Loratadina',
+            dosage: '10 mg',
+            frequency: 'Una vez al día',
+            duration: '5 días',
+            instructions: 'Tomar preferiblemente en la noche.',
+          },
+        ],
       },
-    });
-  }
+    },
+  });
 
   console.log('Seed ejecutado correctamente');
   console.log({
