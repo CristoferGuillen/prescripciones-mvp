@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { AppShell } from '../../../../components/layout/AppShell';
+import { Alert } from '../../../../components/ui/Alert';
 import { Button } from '../../../../components/ui/Button';
 import { Card, CardHeader } from '../../../../components/ui/Card';
 import { StatusBadge } from '../../../../components/ui/StatusBadge';
@@ -19,7 +20,9 @@ export default function PatientPrescriptionDetailPage() {
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConsuming, setIsConsuming] = useState(false);
+  const [isViewingPdf, setIsViewingPdf] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -58,7 +61,16 @@ export default function PatientPrescriptionDetailPage() {
       return;
     }
 
+    const shouldConsume = window.confirm(
+      '¿Seguro que deseas marcar esta prescripción como consumida? Esta acción actualizará el estado de la receta.',
+    );
+
+    if (!shouldConsume) {
+      return;
+    }
+
     setError('');
+    setSuccessMessage('');
     setIsConsuming(true);
 
     try {
@@ -71,6 +83,7 @@ export default function PatientPrescriptionDetailPage() {
       );
 
       setPrescription(updatedPrescription);
+      setSuccessMessage('Prescripción marcada como consumida correctamente.');
     } catch (requestError) {
       const message =
         requestError instanceof Error
@@ -83,6 +96,48 @@ export default function PatientPrescriptionDetailPage() {
     }
   }
 
+  async function handleViewPdf() {
+    const session = getSession();
+
+    if (!session || !prescription) {
+      return;
+    }
+
+    const pdfWindow = window.open('', '_blank');
+
+    if (!pdfWindow) {
+      setError('No se pudo abrir una nueva pestaña. Revisa el bloqueador de ventanas emergentes.');
+      return;
+    }
+
+    pdfWindow.document.write('Generando PDF...');
+
+    setError('');
+    setSuccessMessage('');
+    setIsViewingPdf(true);
+
+    try {
+      const blob = await fetchPrescriptionPdfBlob(prescription.id, session.accessToken);
+      const objectUrl = window.URL.createObjectURL(blob);
+
+      pdfWindow.location.href = objectUrl;
+      setSuccessMessage('PDF abierto en una nueva pestaña.');
+
+      window.setTimeout(() => {
+        window.URL.revokeObjectURL(objectUrl);
+      }, 60000);
+    } catch (requestError) {
+      pdfWindow.close();
+
+      const message =
+        requestError instanceof Error ? requestError.message : 'No se pudo abrir el PDF';
+
+      setError(message);
+    } finally {
+      setIsViewingPdf(false);
+    }
+  }
+
   async function handleDownloadPdf() {
     const session = getSession();
 
@@ -91,22 +146,11 @@ export default function PatientPrescriptionDetailPage() {
     }
 
     setError('');
+    setSuccessMessage('');
     setIsDownloadingPdf(true);
 
     try {
-      const response = await fetch(`${API_URL}/prescriptions/${prescription.id}/pdf`, {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorBody = await response.json().catch(() => null);
-
-        throw new Error(errorBody?.message ?? 'No se pudo descargar el PDF');
-      }
-
-      const blob = await response.blob();
+      const blob = await fetchPrescriptionPdfBlob(prescription.id, session.accessToken);
       const objectUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
 
@@ -117,6 +161,7 @@ export default function PatientPrescriptionDetailPage() {
       link.remove();
 
       window.URL.revokeObjectURL(objectUrl);
+      setSuccessMessage('PDF descargado correctamente.');
     } catch (requestError) {
       const message =
         requestError instanceof Error
@@ -141,16 +186,22 @@ export default function PatientPrescriptionDetailPage() {
         </Button>
       </div>
 
+      {successMessage ? (
+        <Alert variant="success" className="mb-5">
+          {successMessage}
+        </Alert>
+      ) : null}
+
+      {error ? (
+        <Alert variant="error" className="mb-5">
+          {error}
+        </Alert>
+      ) : null}
+
       {isLoading ? (
         <Card>
           <p className="text-sm text-slate-600">Cargando prescripción...</p>
         </Card>
-      ) : null}
-
-      {error ? (
-        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
       ) : null}
 
       {!isLoading && !prescription ? (
@@ -194,8 +245,16 @@ export default function PatientPrescriptionDetailPage() {
 
                 <Button
                   variant="secondary"
+                  onClick={handleViewPdf}
+                  disabled={isViewingPdf || isDownloadingPdf}
+                >
+                  {isViewingPdf ? 'Abriendo...' : 'Ver PDF'}
+                </Button>
+
+                <Button
+                  variant="secondary"
                   onClick={handleDownloadPdf}
-                  disabled={isDownloadingPdf}
+                  disabled={isDownloadingPdf || isViewingPdf}
                 >
                   {isDownloadingPdf ? 'Descargando...' : 'Descargar PDF'}
                 </Button>
@@ -239,7 +298,7 @@ export default function PatientPrescriptionDetailPage() {
 
           <Card>
             <CardHeader title="Notas" />
-            <p className="text-sm text-slate-700">
+            <p className="whitespace-pre-line text-sm text-slate-700">
               {prescription.notes ?? 'Sin notas registradas.'}
             </p>
           </Card>
@@ -290,4 +349,20 @@ export default function PatientPrescriptionDetailPage() {
       ) : null}
     </AppShell>
   );
+}
+
+async function fetchPrescriptionPdfBlob(prescriptionId: string, accessToken: string) {
+  const response = await fetch(`${API_URL}/prescriptions/${prescriptionId}/pdf`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => null);
+
+    throw new Error(errorBody?.message ?? 'No se pudo obtener el PDF');
+  }
+
+  return response.blob();
 }
