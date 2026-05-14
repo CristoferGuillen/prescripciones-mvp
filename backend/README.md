@@ -6,8 +6,9 @@
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-Authentication-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
-![PDF](https://img.shields.io/badge/PDF-pdfkit-red?style=flat-square)
-![Status](https://img.shields.io/badge/Status-API%20Funcional-success?style=flat-square)
+![Render](https://img.shields.io/badge/Deploy-Render-46E3B7?style=flat-square)
+![Neon](https://img.shields.io/badge/Database-Neon-00E599?style=flat-square)
+![Status](https://img.shields.io/badge/Status-API%20Live-success?style=flat-square)
 
 <p align="center">
   <a href="https://skillicons.dev">
@@ -17,18 +18,28 @@
 
 **Prescripciones Médicas API** es el backend del proyecto **Prescripciones Médicas MVP**. Expone una API REST construida con **NestJS**, **Prisma** y **PostgreSQL** para gestionar autenticación, roles, usuarios demo, prescripciones, consumo de recetas, generación de PDF, filtros, paginación y métricas administrativas.
 
-Esta API concentra las reglas de negocio y seguridad del sistema. El frontend consume sus endpoints para operar el flujo médico-paciente-administrador desde el navegador.
+La API está desplegada en Render y conectada a una base de datos PostgreSQL gestionada en Neon.
+
+## Demo API
+
+| Recurso | URL |
+|---|---|
+| API pública | https://prescripciones-mvp.onrender.com |
+| Repositorio | https://github.com/CristoferGuillen/prescripciones-mvp |
+
+> La ruta `/auth/profile` responde `401 Unauthorized` sin token. Ese comportamiento es esperado y confirma que la API está viva y protegida.
 
 ## Tabla de contenidos
 
+- [Demo API](#demo-api)
 - [Descripción general](#descripción-general)
 - [Tecnologías](#tecnologías)
 - [Módulos principales](#módulos-principales)
-- [Modelo de permisos](#modelo-de-permisos)
 - [Variables de entorno](#variables-de-entorno)
 - [Instalación](#instalación)
 - [Base de datos](#base-de-datos)
 - [Ejecución local](#ejecución-local)
+- [Producción](#producción)
 - [Usuarios demo](#usuarios-demo)
 - [Endpoints principales](#endpoints-principales)
 - [Respuesta paginada](#respuesta-paginada)
@@ -47,7 +58,7 @@ El backend permite cubrir el flujo principal del MVP:
 | 1 | Usuario | Inicia sesión y recibe tokens |
 | 2 | Médico | Consulta pacientes disponibles |
 | 3 | Médico | Crea una prescripción |
-| 4 | Paciente | Lista sus prescripciones |
+| 4 | Paciente | Lista y filtra sus prescripciones |
 | 5 | Paciente | Consulta el detalle de una prescripción |
 | 6 | Paciente | Marca la prescripción como consumida |
 | 7 | Paciente | Descarga o visualiza el PDF |
@@ -68,6 +79,8 @@ La seguridad principal vive en esta API: autenticación JWT, guards por rol y va
 - **pdfkit**
 - **class-validator**
 - **class-transformer**
+- **Render**
+- **Neon PostgreSQL**
 
 ## Módulos principales
 
@@ -80,29 +93,9 @@ La seguridad principal vive en esta API: autenticación JWT, guards por rol y va
 | `prisma` | Conexión centralizada con la base de datos |
 | `common` | Guards, decoradores y tipos compartidos |
 
-## Modelo de permisos
-
-| Rol | Permisos principales |
-|---|---|
-| `ADMIN` | Consulta métricas y tiene visibilidad global de prescripciones |
-| `DOCTOR` | Consulta pacientes, crea prescripciones y lista recetas creadas por su perfil |
-| `PATIENT` | Lista sus prescripciones, consulta detalle, consume recetas propias y descarga PDF |
-
 ## Variables de entorno
 
-Crea el archivo:
-
-```txt
-backend/.env
-```
-
-Puedes copiarlo desde:
-
-```txt
-backend/.env.example
-```
-
-Configuración sugerida:
+Configuración local sugerida:
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/prescripciones_mvp?schema=public"
@@ -111,13 +104,21 @@ JWT_REFRESH_SECRET="change_me_refresh_secret"
 JWT_ACCESS_EXPIRES_IN="15m"
 JWT_REFRESH_EXPIRES_IN="7d"
 PORT=3001
+FRONTEND_URL="http://localhost:3000"
 ```
 
-Ajusta usuario, contraseña, host, puerto o nombre de base de datos según tu entorno local.
+Variables usadas en Render:
+
+```env
+DATABASE_URL=connection_string_de_neon
+JWT_ACCESS_SECRET=secret_access
+JWT_REFRESH_SECRET=secret_refresh
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+FRONTEND_URL=https://prescripciones-mvp.vercel.app
+```
 
 ## Instalación
-
-Desde la carpeta `backend`:
 
 ```bash
 npm install
@@ -125,56 +126,44 @@ npm install
 
 ## Base de datos
 
-Ejecutar migraciones:
-
 ```bash
 npm run prisma:migrate
-```
-
-Ejecutar seed:
-
-```bash
 npm run prisma:seed
 ```
 
-Abrir Prisma Studio:
+Para producción:
 
 ```bash
-npm run prisma:studio
+npm run prisma:deploy
+npm run prisma:seed
 ```
-
-Reconstruir la base local y volver a cargar datos iniciales:
-
-```bash
-npx prisma migrate reset
-```
-
-El seed crea usuarios demo, perfiles de médico/paciente y prescripciones distribuidas entre estados `PENDING` y `CONSUMED`.
 
 ## Ejecución local
-
-Modo desarrollo:
 
 ```bash
 npm run start:dev
 ```
 
-La API queda disponible en:
+API local:
 
 ```txt
 http://localhost:3001
 ```
 
-Compilar backend:
+Build productivo:
 
 ```bash
 npm run build
+npm run start:prod
 ```
 
-Ejecutar build compilado:
+## Producción
 
-```bash
-npm run start:prod
+La API se ejecuta en Render usando:
+
+```txt
+Build Command: npm install && npx prisma generate && npm run build
+Start Command: npm run start:prod
 ```
 
 ## Usuarios demo
@@ -196,34 +185,27 @@ npm run start:prod
 | `POST` | `/auth/refresh` | Público | Genera un nuevo access token |
 | `GET` | `/auth/profile` | Autenticado | Devuelve el usuario autenticado |
 
-### Users
-
-| Método | Endpoint | Acceso | Descripción |
-|---|---|---|---|
-| `GET` | `/users?role=PATIENT` | ADMIN, DOCTOR | Lista pacientes disponibles para crear prescripciones |
-
 ### Prescriptions
 
 | Método | Endpoint | Acceso | Descripción |
 |---|---|---|---|
 | `POST` | `/prescriptions` | ADMIN, DOCTOR | Crea una prescripción |
 | `GET` | `/prescriptions` | ADMIN, DOCTOR, PATIENT | Lista prescripciones según rol |
-| `GET` | `/prescriptions?status=PENDING` | ADMIN, DOCTOR, PATIENT | Lista prescripciones pendientes según rol |
-| `GET` | `/prescriptions?status=CONSUMED` | ADMIN, DOCTOR, PATIENT | Lista prescripciones consumidas según rol |
-| `GET` | `/prescriptions?page=1&limit=10` | ADMIN, DOCTOR, PATIENT | Lista prescripciones con paginación simple |
-| `GET` | `/prescriptions/:id` | ADMIN, DOCTOR, PATIENT | Consulta detalle con validación de permisos |
-| `PATCH` | `/prescriptions/:id/consume` | ADMIN, PATIENT | Marca una prescripción como consumida |
-| `GET` | `/prescriptions/:id/pdf` | ADMIN, DOCTOR, PATIENT | Descarga PDF de la prescripción |
+| `GET` | `/prescriptions?status=PENDING` | ADMIN, DOCTOR, PATIENT | Lista pendientes según rol |
+| `GET` | `/prescriptions?status=CONSUMED` | ADMIN, DOCTOR, PATIENT | Lista consumidas según rol |
+| `GET` | `/prescriptions?page=1&limit=10` | ADMIN, DOCTOR, PATIENT | Lista con paginación simple |
+| `GET` | `/prescriptions/:id` | ADMIN, DOCTOR, PATIENT | Consulta detalle con permisos |
+| `PATCH` | `/prescriptions/:id/consume` | ADMIN, PATIENT | Marca como consumida |
+| `GET` | `/prescriptions/:id/pdf` | ADMIN, DOCTOR, PATIENT | Descarga PDF |
 
-### Admin
+### Users y Admin
 
 | Método | Endpoint | Acceso | Descripción |
 |---|---|---|---|
-| `GET` | `/admin/metrics` | ADMIN | Devuelve métricas generales del sistema |
+| `GET` | `/users?role=PATIENT` | ADMIN, DOCTOR | Lista pacientes disponibles |
+| `GET` | `/admin/metrics` | ADMIN | Devuelve métricas generales |
 
 ## Respuesta paginada
-
-`GET /prescriptions` devuelve una estructura paginada:
 
 ```json
 {
@@ -237,67 +219,13 @@ npm run start:prod
 }
 ```
 
-Parámetros soportados:
-
-| Parámetro | Ejemplo | Descripción |
-|---|---|---|
-| `status` | `PENDING` | Filtra por estado |
-| `page` | `1` | Página actual |
-| `limit` | `10` | Cantidad de registros por página |
-
 ## PDF de prescripción
 
-El endpoint:
-
-```txt
-GET /prescriptions/:id/pdf
-```
-
-genera un documento PDF con:
-
-- código de prescripción;
-- ID;
-- fecha de emisión;
-- estado;
-- fecha de consumo;
-- datos del paciente;
-- datos del médico;
-- notas;
-- medicamentos;
-- dosis;
-- frecuencia;
-- duración;
-- instrucciones.
+`GET /prescriptions/:id/pdf` genera un documento PDF con datos del paciente, médico, estado, fecha de emisión, fecha de consumo, notas, medicamentos, dosis, frecuencia, duración e instrucciones.
 
 ## Métricas administrativas
 
-El endpoint:
-
-```txt
-GET /admin/metrics
-```
-
-devuelve:
-
-```json
-{
-  "totals": {
-    "doctors": 1,
-    "patients": 2,
-    "prescriptions": 9
-  },
-  "byStatus": {
-    "pending": 4,
-    "consumed": 5
-  },
-  "byDay": [
-    {
-      "date": "2026-05-14",
-      "count": 4
-    }
-  ]
-}
-```
+`GET /admin/metrics` devuelve totales, conteo por estado y conteo diario.
 
 ## Reglas de negocio
 
@@ -309,7 +237,7 @@ devuelve:
 - El médico solo lista prescripciones creadas por él.
 - El PDF reutiliza la validación de permisos del detalle.
 - Las métricas administrativas requieren rol `ADMIN`.
-- Los filtros y la paginación respetan las reglas de acceso por rol.
+- CORS se controla con `FRONTEND_URL` en producción.
 
 ## Comandos útiles
 
@@ -318,13 +246,11 @@ devuelve:
 | `npm run start:dev` | Ejecuta la API en modo desarrollo |
 | `npm run build` | Compila el backend |
 | `npm run start:prod` | Ejecuta el backend compilado |
-| `npm run prisma:migrate` | Ejecuta migraciones Prisma |
+| `npm run prisma:migrate` | Ejecuta migraciones Prisma en local |
+| `npm run prisma:deploy` | Aplica migraciones en producción |
 | `npm run prisma:seed` | Carga datos iniciales |
 | `npm run prisma:studio` | Abre Prisma Studio |
-| `npm run test` | Ejecuta tests configurados por NestJS |
 
 ## Estado
 
-API funcional para el MVP de prescripciones médicas.
-
-Incluye autenticación, roles, prescripciones, PDF, métricas, seed demo, filtros por estado y paginación simple.
+API funcional y desplegada para el MVP de prescripciones médicas.

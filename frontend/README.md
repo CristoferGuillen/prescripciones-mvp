@@ -4,9 +4,10 @@
 ![React](https://img.shields.io/badge/React-UI-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Frontend-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-Styles-38B2AC?style=flat-square&logo=tailwindcss&logoColor=white)
-![Fetch API](https://img.shields.io/badge/Fetch_API-HTTP-blue?style=flat-square)
+![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
+![Render](https://img.shields.io/badge/API-Render-46E3B7?style=flat-square)
 ![Roles](https://img.shields.io/badge/Roles-ADMIN%20%7C%20DOCTOR%20%7C%20PATIENT-blueviolet?style=flat-square)
-![Status](https://img.shields.io/badge/Status-Frontend%20Funcional-success?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Frontend%20Live-success?style=flat-square)
 
 <p align="center">
   <a href="https://skillicons.dev">
@@ -18,27 +19,34 @@
 
 La aplicación permite operar el flujo principal desde el navegador: login por rol, dashboard administrativo, creación de prescripciones por médico, consulta de recetas por paciente, consumo con confirmación, visualización de PDF y descarga de PDF.
 
+## Demo frontend
+
+| Recurso | URL |
+|---|---|
+| Frontend | https://prescripciones-mvp.vercel.app |
+| Backend API | https://prescripciones-mvp.onrender.com |
+| Repositorio | https://github.com/CristoferGuillen/prescripciones-mvp |
+
+> Reemplaza `https://prescripciones-mvp.vercel.app` por la URL exacta generada por Vercel.
+
 ## Tabla de contenidos
 
+- [Demo frontend](#demo-frontend)
 - [Descripción general](#descripción-general)
 - [Tecnologías](#tecnologías)
 - [Variables de entorno](#variables-de-entorno)
 - [Instalación](#instalación)
 - [Ejecución local](#ejecución-local)
+- [Producción](#producción)
 - [Rutas principales](#rutas-principales)
 - [Credenciales demo](#credenciales-demo)
 - [Flujo principal](#flujo-principal)
 - [Componentes principales](#componentes-principales)
-- [Componentes UI creados](#componentes-ui-creados)
-- [Sesión](#sesión)
-- [Integración con API](#integración-con-api)
 - [Acciones PDF](#acciones-pdf)
 - [Comandos útiles](#comandos-útiles)
 - [Estado](#estado)
 
 ## Descripción general
-
-El frontend presenta una experiencia separada para cada rol:
 
 | Rol | Ruta principal | Experiencia |
 |---|---|---|
@@ -56,30 +64,23 @@ La seguridad principal está en backend. En frontend se implementa protección d
 - **Tailwind CSS**
 - **Fetch API**
 - **localStorage para sesión MVP**
+- **Vercel**
 
 ## Variables de entorno
 
-Crea el archivo:
-
-```txt
-frontend/.env.local
-```
-
-Puedes copiarlo desde:
-
-```txt
-frontend/.env.example
-```
-
-Configuración esperada:
+Configuración local:
 
 ```env
 NEXT_PUBLIC_API_URL="http://localhost:3001"
 ```
 
-## Instalación
+Configuración en Vercel:
 
-Desde la carpeta `frontend`:
+```env
+NEXT_PUBLIC_API_URL=https://prescripciones-mvp.onrender.com
+```
+
+## Instalación
 
 ```bash
 npm install
@@ -87,28 +88,33 @@ npm install
 
 ## Ejecución local
 
-Modo desarrollo:
-
 ```bash
 npm run dev
 ```
 
-La aplicación queda disponible en:
+Frontend local:
 
 ```txt
 http://localhost:3000
 ```
 
-Compilar frontend:
+Build:
 
 ```bash
 npm run build
+npm run start
 ```
 
-Ejecutar build:
+## Producción
 
-```bash
-npm run start
+El frontend se despliega en Vercel usando:
+
+```txt
+Framework Preset: Next.js
+Root Directory: frontend
+Build Command: npm run build
+Install Command: npm install
+Output Directory: .next
 ```
 
 ## Rutas principales
@@ -138,44 +144,25 @@ npm run start
 
 1. Inicia sesión con `doctor@test.com`.
 2. Entra a `/doctor/prescriptions`.
-3. Filtra prescripciones por estado:
-   - Todas.
-   - Pendientes.
-   - Consumidas.
-4. Usa la paginación simple del listado.
-5. Crea una nueva prescripción desde `/doctor/prescriptions/new`.
-6. Selecciona un paciente.
-7. Agrega medicamentos, dosis, frecuencia, duración e instrucciones.
-8. Guarda la prescripción.
-9. Recibe mensaje de éxito y vuelve al listado.
+3. Filtra prescripciones por estado.
+4. Usa la paginación simple.
+5. Crea una nueva prescripción.
+6. Recibe feedback de éxito.
 
 ### Paciente
 
 1. Inicia sesión con `patient@test.com`.
 2. Entra a `/patient/prescriptions`.
-3. Filtra sus prescripciones por estado.
-4. Abre el detalle de una receta.
-5. Revisa médico, paciente, notas y medicamentos.
-6. Si está pendiente, marca la receta como consumida.
-7. Confirma la acción antes de consumir.
-8. Puede ver el PDF en una nueva pestaña.
-9. Puede descargar el PDF.
+3. Filtra sus prescripciones.
+4. Abre el detalle.
+5. Confirma consumo si está pendiente.
+6. Puede ver y descargar PDF.
 
 ### Administrador
 
 1. Inicia sesión con `admin@test.com`.
 2. Entra a `/admin`.
-3. Revisa:
-   - total de médicos;
-   - total de pacientes;
-   - total de prescripciones;
-   - pendientes;
-   - consumidas;
-   - porcentajes;
-   - barra visual;
-   - tabla por día;
-   - última actualización.
-4. Puede actualizar métricas desde el botón correspondiente.
+3. Revisa totales, porcentajes, tabla por día y última actualización.
 
 ## Componentes principales
 
@@ -187,50 +174,7 @@ npm run start
 | `src/lib` | API client, sesión, rutas y formateadores |
 | `src/types` | Tipos TypeScript compartidos |
 
-## Componentes UI creados
-
-| Componente | Uso |
-|---|---|
-| `Button` | Botones reutilizables |
-| `Input` | Campos de formulario |
-| `Card` | Contenedores visuales |
-| `Alert` | Mensajes de éxito, error o información |
-| `EmptyState` | Estados vacíos contextuales |
-| `PaginationControls` | Paginación visual |
-| `PrescriptionStatusFilter` | Filtros Todas/Pendientes/Consumidas |
-| `StatusBadge` | Estado visual de prescripción |
-
-## Sesión
-
-El frontend guarda la sesión MVP en localStorage usando la key:
-
-```txt
-prescripciones_mvp_session
-```
-
-La sesión incluye:
-
-- `accessToken`;
-- `refreshToken`;
-- `user`.
-
-## Integración con API
-
-El frontend consume la API usando `fetch` mediante un helper central:
-
-```txt
-src/lib/api.ts
-```
-
-La URL base se toma desde:
-
-```txt
-NEXT_PUBLIC_API_URL
-```
-
 ## Acciones PDF
-
-En el detalle del paciente existen dos acciones:
 
 | Acción | Descripción |
 |---|---|
@@ -248,6 +192,4 @@ En el detalle del paciente existen dos acciones:
 
 ## Estado
 
-Frontend funcional para el MVP de prescripciones médicas.
-
-Incluye login, rutas por rol, listados con filtros y paginación, creación de prescripciones, detalle del paciente, consumo con confirmación, PDF y dashboard administrativo mejorado.
+Frontend funcional y desplegado para el MVP de prescripciones médicas.
