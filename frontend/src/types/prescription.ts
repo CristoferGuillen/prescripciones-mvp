@@ -45,3 +45,17 @@ export type Prescription = {
   patient: PrescriptionPatient;
   items: PrescriptionItem[];
 };
+
+export type CreatePrescriptionItemInput = {
+  medicineName: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  instructions?: string;
+};
+
+export type CreatePrescriptionInput = {
+  patientId: string;
+  notes?: string;
+  items: CreatePrescriptionItemInput[];
+};
