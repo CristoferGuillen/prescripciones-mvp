@@ -4,16 +4,31 @@ import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 
+function parseCorsOrigins(frontendUrl?: string) {
+  const defaultOrigins = ['http://localhost:3000'];
+
+  if (!frontendUrl) {
+    return defaultOrigins;
+  }
+
+  const configuredOrigins = frontendUrl
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  return [...defaultOrigins, ...configuredOrigins];
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT') ?? 3001;
+  const port = configService.get('PORT') ?? 3001;
+  const frontendUrl = configService.get<string>('FRONTEND_URL');
 
   app.use(helmet());
 
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: parseCorsOrigins(frontendUrl),
     credentials: true,
   });
 
