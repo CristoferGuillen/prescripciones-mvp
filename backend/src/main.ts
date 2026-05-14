@@ -22,7 +22,7 @@ function parseCorsOrigins(frontendUrl?: string) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  const port = configService.get('PORT') ?? 3001;
+  const port = Number(configService.get('PORT') ?? 3001);
   const frontendUrl = configService.get<string>('FRONTEND_URL');
 
   app.use(helmet());
@@ -40,7 +40,7 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 }
 
 bootstrap();
