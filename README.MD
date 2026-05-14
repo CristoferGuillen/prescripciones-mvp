@@ -1,12 +1,12 @@
 # Prescripciones Médicas MVP
 
-![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?style=flat-square&logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-Runtime-339933?style=flat-square&logo=node.js&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-Backend-E0234E?style=flat-square&logo=nestjs&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-Frontend-000000?style=flat-square&logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Fullstack-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=flat-square&logo=postgresql&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-Authentication-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-UI-38B2AC?style=flat-square&logo=tailwindcss&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-MVP%20Funcional-success?style=flat-square)
 ![Technical Test](https://img.shields.io/badge/Prueba-T%C3%A9cnica-blueviolet?style=flat-square)
@@ -17,28 +17,25 @@
   </a>
 </p>
 
-**Prescripciones Médicas MVP** es una aplicación full stack construida como prueba técnica para gestionar el flujo básico de prescripciones médicas entre administradores, médicos y pacientes.
+**Prescripciones Médicas MVP** es una aplicación full stack desarrollada como prueba técnica para gestionar un flujo digital de prescripciones médicas entre administradores, médicos y pacientes.
 
-El sistema permite autenticar usuarios por rol, crear prescripciones desde el perfil médico, consultar prescripciones desde el perfil paciente, marcar recetas como consumidas, descargar un PDF generado desde backend y visualizar métricas administrativas en un dashboard.
+El sistema permite autenticar usuarios por rol, crear prescripciones desde el perfil médico, consultar recetas desde el perfil paciente, marcar prescripciones como consumidas, descargar un PDF generado desde backend y visualizar métricas operativas desde un dashboard administrativo.
 
-> Este proyecto fue desarrollado con enfoque MVP: una entrega funcional, clara, demostrable y orientada a cubrir el flujo principal end-to-end solicitado en la prueba técnica.
-
----
+El proyecto fue construido con un enfoque MVP: una entrega funcional, clara, demostrable y orientada a validar el flujo principal de extremo a extremo.
 
 ## Tabla de contenidos
 
 - [Descripción general](#descripción-general)
 - [Objetivo de la prueba técnica](#objetivo-de-la-prueba-técnica)
-- [Características principales](#características-principales)
-- [Flujo funcional](#flujo-funcional)
-- [Roles del sistema](#roles-del-sistema)
-- [Arquitectura general](#arquitectura-general)
-- [Modelo de dominio](#modelo-de-dominio)
 - [Tecnologías](#tecnologías)
-- [Estructura del proyecto](#estructura-del-proyecto)
+- [Funcionalidades principales](#funcionalidades-principales)
+- [Roles del sistema](#roles-del-sistema)
+- [Modelo del dominio](#modelo-del-dominio)
+- [Arquitectura del proyecto](#arquitectura-del-proyecto)
+- [Estructura del repositorio](#estructura-del-repositorio)
 - [Requisitos previos](#requisitos-previos)
-- [Variables de entorno](#variables-de-entorno)
 - [Instalación](#instalación)
+- [Configuración](#configuración)
 - [Base de datos](#base-de-datos)
 - [Ejecución local](#ejecución-local)
 - [Credenciales de prueba](#credenciales-de-prueba)
@@ -46,219 +43,51 @@ El sistema permite autenticar usuarios por rol, crear prescripciones desde el pe
 - [Endpoints principales](#endpoints-principales)
 - [Flujo de prueba recomendado](#flujo-de-prueba-recomendado)
 - [Comandos útiles](#comandos-útiles)
-- [Seguridad implementada](#seguridad-implementada)
-- [Decisiones técnicas](#decisiones-técnicas)
-- [Alcance MVP](#alcance-mvp)
+- [Seguridad y permisos](#seguridad-y-permisos)
 - [Evidencia QA](#evidencia-qa)
 - [Estado de entrega](#estado-de-entrega)
+- [Proyección del producto](#proyección-del-producto)
 - [Autor](#autor)
-
----
 
 ## Descripción general
 
-**Prescripciones Médicas MVP** centraliza el proceso básico de emisión, consulta y consumo de prescripciones médicas.
+Prescripciones Médicas MVP centraliza el proceso básico de emisión, consulta y consumo de recetas médicas digitales.
 
-La aplicación está diseñada alrededor de tres perfiles principales:
+La aplicación está organizada en tres experiencias principales:
 
 - **Administrador:** consulta métricas generales del sistema.
-- **Médico:** crea prescripciones para pacientes existentes.
-- **Paciente:** consulta sus prescripciones, revisa el detalle, marca una receta como consumida y descarga el PDF correspondiente.
+- **Médico:** revisa sus prescripciones y crea nuevas recetas para pacientes existentes.
+- **Paciente:** consulta sus prescripciones, revisa el detalle, marca recetas como consumidas y descarga el PDF correspondiente.
 
-El producto prioriza una experiencia clara, segura y demostrable, con separación entre backend y frontend, validación de permisos desde servidor y documentación preparada para facilitar la evaluación técnica.
-
----
+El sistema prioriza una experiencia sobria y directa, con reglas de negocio protegidas desde backend y una interfaz web preparada para demostrar el flujo completo sin depender de herramientas externas como Postman.
 
 ## Objetivo de la prueba técnica
 
-El objetivo de esta prueba fue construir un MVP funcional de punta a punta para demostrar capacidades full stack en:
+El objetivo de esta prueba técnica fue construir un MVP full stack que demuestre dominio de:
 
 - diseño de base de datos relacional;
 - autenticación con JWT;
-- control de acceso por roles;
-- reglas de negocio en backend;
-- consumo de API desde frontend;
-- generación de documentos PDF;
+- autorización basada en roles;
+- reglas de negocio desde backend;
+- consumo de API REST desde frontend;
+- generación de PDF;
+- manejo de estados;
 - dashboard administrativo;
-- documentación y validación manual del flujo completo.
+- documentación técnica;
+- validación manual del flujo principal.
 
-El flujo principal esperado es:
+El flujo funcional principal es:
 
-```text
-Médico crea prescripción
-Paciente visualiza prescripción
-Paciente marca como consumida
-Paciente descarga PDF
-Administrador revisa métricas actualizadas
-```
-
----
-
-## Características principales
-
-### Autenticación y sesión
-
-- Login con email y contraseña.
-- Passwords protegidas con bcrypt.
-- Access token con JWT.
-- Refresh token simple.
-- Perfil autenticado.
-- Persistencia de sesión en frontend con localStorage.
-- Logout desde interfaz.
-
-### Control de acceso por roles
-
-- Roles disponibles:
-  - `ADMIN`
-  - `DOCTOR`
-  - `PATIENT`
-- Guards en backend.
-- Decorador `@Roles()`.
-- Decorador `CurrentUser`.
-- Validación de permisos por rol.
-- Redirección por rol desde frontend.
-- Protección básica de rutas en cliente.
-
-### Prescripciones médicas
-
-- Creación de prescripciones por médico.
-- Selección de paciente existente.
-- Registro de notas generales.
-- Registro de uno o varios medicamentos.
-- Listado de prescripciones por rol.
-- Detalle de prescripción.
-- Cambio de estado a consumida.
-- Bloqueo de consumo duplicado.
-- Bloqueo de acceso a prescripciones ajenas.
-
-### PDF desde backend
-
-- Generación de PDF con pdfkit.
-- Descarga protegida por permisos.
-- PDF con:
-  - código de prescripción;
-  - ID;
-  - fecha de emisión;
-  - estado;
-  - fecha de consumo;
-  - datos del paciente;
-  - datos del médico;
-  - notas;
-  - medicamentos, dosis, frecuencia, duración e instrucciones.
-
-### Dashboard administrativo
-
-- Cards con totales generales.
-- Conteo de prescripciones por estado.
-- Tabla de prescripciones por día.
-- Botón para actualizar métricas.
-- Acceso exclusivo para administradores.
-
-### Evidencia QA
-
-- Pruebas manuales documentadas por sprint.
-- Validación funcional de backend.
-- Validación funcional de frontend.
-- Validación del flujo completo end-to-end.
-
----
-
-## Flujo funcional
-
-```mermaid
-flowchart LR
-    A[Login] --> B{Rol del usuario}
-
-    B -->|ADMIN| C[Dashboard admin]
-    C --> C1[Ver métricas]
-    C --> C2[Totales y estados]
-
-    B -->|DOCTOR| D[Listado médico]
-    D --> E[Crear prescripción]
-    E --> F[Seleccionar paciente]
-    F --> G[Agregar medicamentos]
-    G --> H[Prescripción creada]
-
-    B -->|PATIENT| I[Listado paciente]
-    I --> J[Detalle de prescripción]
-    J --> K[Marcar como consumida]
-    J --> L[Descargar PDF]
-
-    H --> I
-    K --> C
-```
-
----
-
-## Roles del sistema
-
-| Rol | Descripción | Capacidades principales |
+| Paso | Actor | Acción |
 |---|---|---|
-| `ADMIN` | Usuario administrativo del sistema | Ver métricas, listar prescripciones globales, acceder a información administrativa |
-| `DOCTOR` | Médico responsable de crear recetas | Consultar pacientes, crear prescripciones, listar sus prescripciones y descargar PDFs propios |
-| `PATIENT` | Paciente receptor de prescripciones | Ver sus recetas, consultar detalle, marcar como consumida y descargar PDF propio |
-
----
-
-## Arquitectura general
-
-El proyecto usa una arquitectura separada por aplicaciones:
-
-```text
-Frontend Next.js  --->  API NestJS  --->  Prisma ORM  --->  PostgreSQL
-       |                    |
-       |                    ├── Auth JWT
-       |                    ├── RBAC
-       |                    ├── Prescriptions
-       |                    ├── PDF generation
-       |                    └── Admin metrics
-       |
-       └── localStorage session MVP
-```
-
-### Backend
-
-El backend expone una API REST construida con NestJS. Centraliza autenticación, reglas de negocio, permisos, generación de PDF y métricas administrativas.
-
-### Frontend
-
-El frontend está construido con Next.js App Router. Consume la API REST, gestiona sesión en localStorage y presenta interfaces separadas por rol.
-
-### Base de datos
-
-La persistencia usa PostgreSQL con Prisma ORM. El modelo se centra en usuarios, médicos, pacientes, prescripciones e items de prescripción.
-
----
-
-## Modelo de dominio
-
-| Entidad | Propósito |
-|---|---|
-| `User` | Usuario autenticable del sistema. Contiene email, password hasheada, nombre y rol |
-| `Doctor` | Perfil médico asociado a un usuario con rol `DOCTOR` |
-| `Patient` | Perfil paciente asociado a un usuario con rol `PATIENT` |
-| `Prescription` | Prescripción médica creada por un médico para un paciente |
-| `PrescriptionItem` | Medicamento o indicación dentro de una prescripción |
-
-### Relaciones principales
-
-```mermaid
-erDiagram
-    User ||--o| Doctor : has
-    User ||--o| Patient : has
-    Doctor ||--o{ Prescription : creates
-    Patient ||--o{ Prescription : receives
-    Prescription ||--o{ PrescriptionItem : contains
-```
-
-### Estados de prescripción
-
-| Estado | Descripción |
-|---|---|
-| `PENDING` | Prescripción pendiente de consumo |
-| `CONSUMED` | Prescripción marcada como consumida por el paciente |
-
----
+| 1 | Médico | Inicia sesión |
+| 2 | Médico | Crea una prescripción para un paciente existente |
+| 3 | Paciente | Inicia sesión |
+| 4 | Paciente | Consulta la prescripción asignada |
+| 5 | Paciente | Marca la prescripción como consumida |
+| 6 | Paciente | Descarga el PDF de la prescripción |
+| 7 | Administrador | Inicia sesión |
+| 8 | Administrador | Revisa métricas actualizadas |
 
 ## Tecnologías
 
@@ -283,7 +112,7 @@ erDiagram
 - **TypeScript**
 - **Tailwind CSS**
 - **Fetch API**
-- **localStorage**
+- **localStorage para sesión MVP**
 
 ### Herramientas de desarrollo
 
@@ -292,9 +121,122 @@ erDiagram
 - **PowerShell para pruebas manuales**
 - **Git / GitHub**
 
----
+## Funcionalidades principales
 
-## Estructura del proyecto
+### Autenticación
+
+- Login con email y contraseña.
+- Access token con JWT.
+- Refresh token simple.
+- Consulta de perfil autenticado.
+- Persistencia de sesión en frontend.
+- Cierre de sesión desde la interfaz.
+- Redirección automática según rol.
+
+### Control de acceso por roles
+
+- Roles disponibles:
+  - `ADMIN`
+  - `DOCTOR`
+  - `PATIENT`
+- Guards de autenticación.
+- Guards de roles.
+- Decorador `@Roles()`.
+- Decorador `CurrentUser`.
+- Protección de rutas sensibles desde backend.
+- Protección básica de rutas en frontend para mejorar la experiencia de usuario.
+
+### Gestión de prescripciones
+
+- Creación de prescripciones por médico.
+- Selección de paciente existente.
+- Registro de notas generales.
+- Registro de medicamentos con:
+  - nombre del medicamento;
+  - dosis;
+  - frecuencia;
+  - duración;
+  - instrucciones.
+- Listado de prescripciones filtrado por rol.
+- Detalle de prescripción.
+- Cambio de estado de `PENDING` a `CONSUMED`.
+- Prevención de consumo duplicado.
+- Validación de acceso a prescripciones propias.
+
+### PDF de prescripción
+
+- Generación de PDF desde backend.
+- Descarga protegida por permisos.
+- Documento con:
+  - código de prescripción;
+  - ID;
+  - fecha de emisión;
+  - estado;
+  - fecha de consumo;
+  - datos del paciente;
+  - datos del médico;
+  - notas;
+  - medicamentos e instrucciones.
+
+### Dashboard administrativo
+
+- Total de médicos.
+- Total de pacientes.
+- Total de prescripciones.
+- Conteo de prescripciones pendientes.
+- Conteo de prescripciones consumidas.
+- Tabla de prescripciones por día.
+- Botón para actualizar métricas.
+
+## Roles del sistema
+
+| Rol | Descripción | Funciones principales |
+|---|---|---|
+| `ADMIN` | Usuario administrativo | Consulta dashboard de métricas y tiene visibilidad global del sistema |
+| `DOCTOR` | Médico emisor | Crea prescripciones, lista sus recetas y puede descargar PDFs propios |
+| `PATIENT` | Paciente receptor | Consulta sus recetas, revisa detalle, marca como consumida y descarga PDF |
+
+## Modelo del dominio
+
+El sistema está organizado alrededor de entidades simples y enfocadas en el flujo principal de prescripción médica.
+
+| Entidad | Propósito |
+|---|---|
+| `User` | Usuario autenticable del sistema con email, password, nombre y rol |
+| `Doctor` | Perfil médico asociado a un usuario con rol `DOCTOR` |
+| `Patient` | Perfil paciente asociado a un usuario con rol `PATIENT` |
+| `Prescription` | Prescripción creada por un médico para un paciente |
+| `PrescriptionItem` | Medicamento o indicación incluida dentro de una prescripción |
+
+### Relaciones principales
+
+| Relación | Descripción |
+|---|---|
+| `User` → `Doctor` | Un usuario médico tiene un perfil de doctor |
+| `User` → `Patient` | Un usuario paciente tiene un perfil de paciente |
+| `Doctor` → `Prescription` | Un médico puede crear muchas prescripciones |
+| `Patient` → `Prescription` | Un paciente puede recibir muchas prescripciones |
+| `Prescription` → `PrescriptionItem` | Una prescripción puede tener uno o varios medicamentos |
+
+### Estados de prescripción
+
+| Estado | Descripción |
+|---|---|
+| `PENDING` | Prescripción pendiente de consumo |
+| `CONSUMED` | Prescripción marcada como consumida |
+
+## Arquitectura del proyecto
+
+El proyecto está separado en dos aplicaciones principales:
+
+| Aplicación | Tecnología | Responsabilidad |
+|---|---|---|
+| `backend` | NestJS | API REST, autenticación, roles, reglas de negocio, Prisma, PDF y métricas |
+| `frontend` | Next.js | Interfaz web, login, navegación por rol, consumo de API y flujo visual |
+
+El backend centraliza la seguridad y las reglas del sistema. El frontend consume la API y presenta una experiencia clara para cada rol.
+
+## Estructura del repositorio
 
 ```text
 prescripciones-mvp/
@@ -304,49 +246,21 @@ prescripciones-mvp/
 │   │   └── seed.ts
 │   ├── src/
 │   │   ├── admin/
-│   │   │   ├── admin.controller.ts
-│   │   │   ├── admin.module.ts
-│   │   │   └── admin.service.ts
 │   │   ├── auth/
-│   │   │   ├── dto/
-│   │   │   ├── auth.controller.ts
-│   │   │   ├── auth.module.ts
-│   │   │   ├── auth.service.ts
-│   │   │   └── jwt.strategy.ts
 │   │   ├── common/
-│   │   │   ├── decorators/
-│   │   │   ├── guards/
-│   │   │   └── types/
 │   │   ├── prescriptions/
-│   │   │   ├── dto/
-│   │   │   ├── prescriptions.controller.ts
-│   │   │   ├── prescriptions.module.ts
-│   │   │   └── prescriptions.service.ts
 │   │   ├── prisma/
-│   │   │   ├── prisma.module.ts
-│   │   │   └── prisma.service.ts
 │   │   ├── users/
-│   │   │   ├── users.controller.ts
-│   │   │   ├── users.module.ts
-│   │   │   └── users.service.ts
 │   │   ├── app.module.ts
 │   │   └── main.ts
 │   ├── .env.example
 │   └── package.json
 │
 ├── frontend/
+│   ├── public/
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── admin/
-│   │   │   ├── doctor/
-│   │   │   ├── login/
-│   │   │   ├── patient/
-│   │   │   ├── globals.css
-│   │   │   ├── layout.tsx
-│   │   │   └── page.tsx
 │   │   ├── components/
-│   │   │   ├── layout/
-│   │   │   └── ui/
 │   │   ├── lib/
 │   │   └── types/
 │   ├── .env.example
@@ -354,48 +268,71 @@ prescripciones-mvp/
 │
 ├── docs/
 │   └── qa/
-├── README.md
-└── .gitignore
+├── .gitignore
+└── README.md
 ```
-
----
 
 ## Requisitos previos
 
-Antes de ejecutar el proyecto, asegúrate de tener instalado:
+Antes de instalar el proyecto, asegúrate de tener disponible:
 
-- Node.js 20 o superior.
+- Node.js.
 - npm.
 - PostgreSQL.
 - Git.
 
-También debes tener una base de datos local creada para el proyecto.
-
-Nombre recomendado:
+Base de datos local recomendada:
 
 ```text
 prescripciones_mvp
 ```
 
----
+## Instalación
 
-## Variables de entorno
+Clona el repositorio:
+
+```bash
+git clone https://github.com/CristoferGuillen/prescripciones-mvp.git
+```
+
+Entra al proyecto:
+
+```bash
+cd prescripciones-mvp
+```
+
+Instala dependencias del backend:
+
+```bash
+cd backend
+npm install
+```
+
+Instala dependencias del frontend:
+
+```bash
+cd ../frontend
+npm install
+```
+
+## Configuración
 
 ### Backend
 
-Crear el archivo:
+Crea el archivo de entorno del backend:
 
-```text
-backend/.env
+```bash
+cd backend
+cp .env.example .env
 ```
 
-Puedes copiarlo desde:
+En Windows PowerShell:
 
-```text
-backend/.env.example
+```powershell
+Copy-Item .env.example .env
 ```
 
-Configuración sugerida:
+Configura la conexión a PostgreSQL y secretos JWT:
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/prescripciones_mvp?schema=public"
@@ -406,89 +343,50 @@ JWT_REFRESH_EXPIRES_IN="7d"
 PORT=3001
 ```
 
-> Ajusta usuario, contraseña, host, puerto o nombre de base de datos según tu configuración local de PostgreSQL.
+Ajusta el usuario, contraseña y nombre de base de datos según tu entorno local.
 
 ### Frontend
 
-Crear el archivo:
+Crea el archivo de entorno del frontend:
 
-```text
-frontend/.env.local
+```bash
+cd frontend
+cp .env.example .env.local
 ```
 
-Puedes copiarlo desde:
+En Windows PowerShell:
 
-```text
-frontend/.env.example
+```powershell
+Copy-Item .env.example .env.local
 ```
 
-Configuración esperada:
+Configura la URL del backend:
 
 ```env
 NEXT_PUBLIC_API_URL="http://localhost:3001"
 ```
 
----
-
-## Instalación
-
-Clonar el repositorio:
-
-```bash
-git clone https://github.com/CristoferGuillen/prescripciones-mvp.git
-```
-
-Entrar al proyecto:
-
-```bash
-cd prescripciones-mvp
-```
-
-Instalar dependencias del backend:
-
-```bash
-cd backend
-npm install
-```
-
-Instalar dependencias del frontend:
-
-```bash
-cd ../frontend
-npm install
-```
-
----
-
 ## Base de datos
 
-Desde la carpeta `backend`, ejecutar:
+Desde la carpeta `backend`, ejecuta las migraciones:
 
 ```bash
 npm run prisma:migrate
+```
+
+Carga los datos iniciales:
+
+```bash
 npm run prisma:seed
 ```
 
-Para reconstruir completamente la base de datos local con datos iniciales:
+También puedes reconstruir la base de datos local y volver a cargar el seed con:
 
 ```bash
 npx prisma migrate reset
 ```
 
-> Este comando reinicia la base de datos local, aplica migraciones y ejecuta el seed.
-
-### Datos creados por el seed
-
-El seed crea:
-
-- un usuario administrador;
-- un usuario médico;
-- dos usuarios pacientes;
-- perfiles asociados de médico y paciente;
-- prescripciones demo;
-- items de prescripción.
-
----
+El seed crea usuarios de prueba, perfiles médicos y pacientes, además de prescripciones demo para validar los flujos desde el primer arranque.
 
 ## Ejecución local
 
@@ -518,8 +416,6 @@ Frontend disponible en:
 http://localhost:3000
 ```
 
----
-
 ## Credenciales de prueba
 
 | Rol | Email | Password | Ruta esperada |
@@ -528,8 +424,6 @@ http://localhost:3000
 | Médico | `doctor@test.com` | `doctor123` | `/doctor/prescriptions` |
 | Paciente | `patient@test.com` | `patient123` | `/patient/prescriptions` |
 | Paciente 2 | `patient2@test.com` | `patient123` | `/patient/prescriptions` |
-
----
 
 ## Rutas del frontend
 
@@ -542,8 +436,6 @@ http://localhost:3000
 | `/doctor/prescriptions/new` | DOCTOR | Crear nueva prescripción |
 | `/patient/prescriptions` | PATIENT | Listado de prescripciones del paciente |
 | `/patient/prescriptions/:id` | PATIENT | Detalle, consumo y descarga PDF |
-
----
 
 ## Endpoints principales
 
@@ -577,65 +469,43 @@ http://localhost:3000
 |---|---|---|---|
 | `GET` | `/admin/metrics` | ADMIN | Devuelve métricas generales del sistema |
 
----
-
 ## Flujo de prueba recomendado
 
-### 1. Iniciar sesión como médico
+### 1. Médico crea una prescripción
 
-Credenciales:
+1. Entrar a `http://localhost:3000/login`.
+2. Iniciar sesión con:
+   - `doctor@test.com`
+   - `doctor123`
+3. Ir a `/doctor/prescriptions`.
+4. Hacer clic en **Nueva prescripción**.
+5. Seleccionar `patient@test.com`.
+6. Completar notas y medicamentos.
+7. Crear la prescripción.
+8. Confirmar que aparece en el listado médico.
 
-```text
-doctor@test.com
-doctor123
-```
+### 2. Paciente consume la prescripción
 
-Acciones:
+1. Cerrar sesión.
+2. Iniciar sesión con:
+   - `patient@test.com`
+   - `patient123`
+3. Ir a `/patient/prescriptions`.
+4. Abrir el detalle de la prescripción.
+5. Revisar médico, paciente, notas y medicamentos.
+6. Marcar la prescripción como consumida.
+7. Descargar el PDF.
+8. Verificar que el PDF abre correctamente.
 
-1. Entrar a `/doctor/prescriptions`.
-2. Revisar el listado de prescripciones.
-3. Hacer clic en **Nueva prescripción**.
-4. Seleccionar `patient@test.com`.
-5. Completar notas e items de medicamento.
-6. Crear la prescripción.
-7. Verificar que aparece en el listado médico.
+### 3. Admin revisa métricas
 
-### 2. Iniciar sesión como paciente
-
-Credenciales:
-
-```text
-patient@test.com
-patient123
-```
-
-Acciones:
-
-1. Entrar a `/patient/prescriptions`.
-2. Abrir la prescripción creada.
-3. Revisar datos del médico, paciente, notas y medicamentos.
-4. Marcar la prescripción como consumida.
-5. Descargar el PDF.
-6. Verificar que el PDF abre correctamente.
-
-### 3. Iniciar sesión como administrador
-
-Credenciales:
-
-```text
-admin@test.com
-admin123
-```
-
-Acciones:
-
-1. Entrar a `/admin`.
-2. Revisar cards de totales.
-3. Revisar prescripciones pendientes y consumidas.
-4. Revisar tabla por día.
+1. Cerrar sesión.
+2. Iniciar sesión con:
+   - `admin@test.com`
+   - `admin123`
+3. Entrar a `/admin`.
+4. Revisar totales, conteo por estado y tabla por día.
 5. Usar el botón **Actualizar métricas**.
-
----
 
 ## Comandos útiles
 
@@ -703,107 +573,48 @@ Ejecutar build en modo producción:
 npm run start
 ```
 
----
-
-## Seguridad implementada
+## Seguridad y permisos
 
 La seguridad principal está implementada en backend.
 
-### Autenticación
-
-- Login con email y password.
-- Passwords hasheadas con bcrypt.
-- Access token JWT.
-- Refresh token simple.
-- Endpoint de perfil autenticado.
-
-### Autorización
-
-- Guards de JWT.
-- Guards de roles.
-- Decorador `@Roles()`.
-- Decorador `CurrentUser`.
-- Validación de permisos por recurso.
+| Área | Implementación |
+|---|---|
+| Passwords | Hash con bcrypt |
+| Autenticación | JWT access token |
+| Sesión | Refresh token simple |
+| Autorización | Guards y roles |
+| Decoradores | `@Roles()` y `CurrentUser` |
+| Validación | DTOs con class-validator |
+| Recursos | Validación por propietario y rol |
 
 ### Reglas protegidas
 
-- Paciente solo ve sus prescripciones.
-- Paciente solo consume prescripciones propias.
-- Paciente no puede acceder a prescripciones ajenas.
-- Médico solo ve prescripciones creadas por él.
-- Médico puede crear prescripciones para pacientes existentes.
-- Admin puede consultar métricas generales.
-- Rutas sensibles devuelven `401` sin token.
-- Rutas no permitidas devuelven `403`.
-
----
-
-## Decisiones técnicas
-
-- Se construyó un MVP funcional orientado al flujo principal de evaluación.
-- Se separó backend y frontend para mantener responsabilidades claras.
-- Se usó Prisma para modelar relaciones y acelerar el trabajo con PostgreSQL.
-- Se usó JWT para autenticación stateless.
-- Se usó pdfkit para generar PDFs desde backend sin depender de navegador o Puppeteer.
-- Se usó localStorage para persistencia de sesión en frontend por simplicidad del MVP.
-- Se documentaron pruebas manuales por sprint para dejar trazabilidad del avance.
-- Se priorizó seguridad en backend sobre validaciones únicamente visuales.
-
----
-
-## Alcance MVP
-
-Este proyecto se enfoca en entregar un flujo médico-paciente-administrador completo y evaluable.
-
-### Incluido
-
-- Autenticación.
-- Roles.
-- Seed funcional.
-- Prescripciones.
-- Consumo.
-- PDF.
-- Dashboard admin.
-- Frontend funcional.
-- README.
-- Evidencia QA manual.
-
-### Preparado para crecer
-
-El diseño permite extender el sistema con futuras mejoras como:
-
-- CRUD administrativo de usuarios;
-- catálogo de medicamentos;
-- firma digital;
-- QR de validación;
-- auditoría avanzada;
-- paginación y filtros;
-- notificaciones;
-- despliegue productivo;
-- suite de tests automatizados.
-
----
+- Rutas sensibles requieren token.
+- Rutas no autorizadas responden `403`.
+- Pacientes solo ven sus prescripciones.
+- Pacientes solo consumen prescripciones propias.
+- Pacientes no acceden a recetas ajenas.
+- Médicos solo listan prescripciones creadas por ellos.
+- Médicos crean prescripciones para pacientes existentes.
+- Administradores acceden al dashboard de métricas.
 
 ## Evidencia QA
 
-El proyecto incluye evidencias de pruebas manuales por sprint en:
+El proyecto incluye evidencia de pruebas manuales en:
 
 ```text
 docs/qa/
 ```
 
-Archivos incluidos:
+Archivos actuales:
 
 | Archivo | Validación |
 |---|---|
-| `sprint-2-auth-rbac.md` | Login, JWT, refresh token y roles |
-| `sprint-3-prescripciones-backend.md` | Prescripciones backend y permisos |
-| `sprint-4-pdf-metricas.md` | PDF y métricas admin |
-| `sprint-5-frontend-login-rutas.md` | Login frontend y rutas por rol |
-| `sprint-6-frontend-medico-paciente.md` | Flujo médico-paciente frontend |
-| `sprint-7-admin-readme-entrega.md` | Dashboard admin, README y entrega |
-
----
+| `Sprint 2.md` | Autenticación, JWT, refresh token y roles |
+| `Sprint 3.md` | Prescripciones backend y validación de permisos |
+| `sprint 4.md` | PDF y métricas admin |
+| `sprint 5.md` | Login frontend, sesión y rutas por rol |
+| `sprint 6.md` | Flujo médico-paciente en frontend |
 
 ## Estado de entrega
 
@@ -826,7 +637,23 @@ MVP completado y validado manualmente.
 | README | Completado |
 | QA manual | Completado |
 
----
+## Proyección del producto
+
+El MVP deja una base sólida para evolucionar hacia una plataforma de prescripciones médicas más completa.
+
+Posibles siguientes mejoras:
+
+- administración visual de usuarios;
+- catálogo de medicamentos;
+- filtros y búsqueda avanzada;
+- paginación de listados;
+- auditoría de acciones;
+- firma digital;
+- QR de validación;
+- notificaciones;
+- despliegue productivo;
+- pruebas automatizadas;
+- documentación OpenAPI.
 
 ## Autor
 
