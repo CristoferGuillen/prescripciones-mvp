@@ -5,7 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, PrescriptionStatus, Role } from '@prisma/client';
-import { AuthUser } from '../common/types/auth-user.type';
+import PDFDocument from 'pdfkit';
+import type { AuthUser } from '../common/types/auth-user.type';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 
@@ -148,6 +149,12 @@ export class PrescriptionsService {
     });
   }
 
+  async generatePdf(currentUser: AuthUser, id: string) {
+    const prescription = await this.findOne(currentUser, id);
+
+    return this.createPrescriptionPdfBuffer(prescription);
+  }
+
   private async resolveDoctorIdForCreation(currentUser: AuthUser): Promise<string> {
     if (currentUser.role === Role.DOCTOR) {
       const doctor = await this.prisma.doctor.findUnique({
@@ -244,6 +251,115 @@ export class PrescriptionsService {
     }
 
     throw new ForbiddenException('No puede consumir esta prescripción');
+  }
+
+  private createPrescriptionPdfBuffer(prescription: PrescriptionWithRelations) {
+    return new Promise<Buffer>((resolve, reject) => {
+      const document = new PDFDocument({
+        margin: 50,
+        size: 'A4',
+      });
+
+      const chunks: Buffer[] = [];
+
+      document.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+
+      document.on('end', () => {
+        resolve(Buffer.concat(chunks));
+      });
+
+      document.on('error', (error) => {
+        reject(error);
+      });
+
+      document
+        .fontSize(20)
+        .text('Prescripción médica', {
+          align: 'center',
+        })
+        .moveDown();
+
+      document.fontSize(11).text(`Código: ${prescription.code}`);
+      document.text(`ID: ${prescription.id}`);
+      document.text(`Fecha de emisión: ${this.formatDate(prescription.createdAt)}`);
+      document.text(`Estado: ${prescription.status}`);
+      document.text(
+        `Fecha de consumo: ${
+          prescription.consumedAt ? this.formatDate(prescription.consumedAt) : 'No consumida'
+        }`,
+      );
+
+      document.moveDown();
+
+      document.fontSize(14).text('Datos del paciente', {
+        underline: true,
+      });
+      document.fontSize(11).text(`Nombre: ${prescription.patient.user.name}`);
+      document.text(`Email: ${prescription.patient.user.email}`);
+      document.text(
+        `Fecha de nacimiento: ${
+          prescription.patient.birthDate
+            ? this.formatDate(prescription.patient.birthDate)
+            : 'No registrada'
+        }`,
+      );
+
+      document.moveDown();
+
+      document.fontSize(14).text('Datos del médico', {
+        underline: true,
+      });
+      document.fontSize(11).text(`Nombre: ${prescription.doctor.user.name}`);
+      document.text(`Email: ${prescription.doctor.user.email}`);
+      document.text(`Especialidad: ${prescription.doctor.specialty ?? 'No registrada'}`);
+
+      document.moveDown();
+
+      document.fontSize(14).text('Notas', {
+        underline: true,
+      });
+      document.fontSize(11).text(prescription.notes ?? 'Sin notas registradas.');
+
+      document.moveDown();
+
+      document.fontSize(14).text('Medicamentos', {
+        underline: true,
+      });
+
+      prescription.items.forEach((item, index) => {
+        document.moveDown(0.5);
+        document.fontSize(12).text(`${index + 1}. ${item.medicineName}`);
+        document.fontSize(11).text(`Dosis: ${item.dosage}`);
+        document.text(`Frecuencia: ${item.frequency}`);
+        document.text(`Duración: ${item.duration}`);
+        document.text(`Instrucciones: ${item.instructions ?? 'Sin instrucciones adicionales.'}`);
+      });
+
+      document.moveDown(2);
+
+      document
+        .fontSize(9)
+        .text(
+          'Documento generado automáticamente por el sistema MVP de prescripciones médicas.',
+          {
+            align: 'center',
+          },
+        );
+
+      document.end();
+    });
+  }
+
+  private formatDate(date: Date) {
+    return new Intl.DateTimeFormat('es-DO', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
   }
 
   private generatePrescriptionCode() {

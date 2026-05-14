@@ -1,5 +1,16 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  Param,
+  Patch,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Role } from '@prisma/client';
+import type { Response } from 'express';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -32,6 +43,25 @@ export class PrescriptionsController {
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
   findOne(@CurrentUser() currentUser: AuthUser, @Param('id') id: string) {
     return this.prescriptionsService.findOne(currentUser, id);
+  }
+
+  @Get(':id/pdf')
+  @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
+  @Header('Content-Type', 'application/pdf')
+  async downloadPdf(
+    @CurrentUser() currentUser: AuthUser,
+    @Param('id') id: string,
+    @Res() response: Response,
+  ) {
+    const pdfBuffer = await this.prescriptionsService.generatePdf(currentUser, id);
+
+    response.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="prescripcion-${id}.pdf"`,
+      'Content-Length': pdfBuffer.length,
+    });
+
+    response.end(pdfBuffer);
   }
 
   @Patch(':id/consume')
