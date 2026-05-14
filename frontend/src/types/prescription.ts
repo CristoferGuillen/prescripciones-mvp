@@ -1,5 +1,7 @@
 export type PrescriptionStatus = 'PENDING' | 'CONSUMED';
 
+export type PrescriptionStatusFilter = 'ALL' | PrescriptionStatus;
+
 export type PrescriptionItem = {
   id: string;
   prescriptionId: string;
@@ -58,4 +60,16 @@ export type CreatePrescriptionInput = {
   patientId: string;
   notes?: string;
   items: CreatePrescriptionItemInput[];
+};
+
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export type PaginatedPrescriptionsResponse = {
+  data: Prescription[];
+  meta: PaginationMeta;
 };

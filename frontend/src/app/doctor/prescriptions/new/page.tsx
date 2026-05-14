@@ -3,6 +3,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '../../../../components/layout/AppShell';
+import { Alert } from '../../../../components/ui/Alert';
 import { Button } from '../../../../components/ui/Button';
 import { Card, CardHeader } from '../../../../components/ui/Card';
 import { Input } from '../../../../components/ui/Input';
@@ -130,7 +131,7 @@ export default function NewPrescriptionPage() {
         body: JSON.stringify(payload),
       });
 
-      router.push('/doctor/prescriptions');
+      router.push('/doctor/prescriptions?created=1');
     } catch (requestError) {
       const message =
         requestError instanceof Error
@@ -156,9 +157,9 @@ export default function NewPrescriptionPage() {
         />
 
         {error ? (
-          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <Alert variant="error" className="mb-5">
             {error}
-          </div>
+          </Alert>
         ) : null}
 
         <form onSubmit={handleSubmit} className="space-y-6">

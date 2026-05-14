@@ -1,49 +1,113 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppShell } from '../../../components/layout/AppShell';
+import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
 import { Card, CardHeader } from '../../../components/ui/Card';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { PaginationControls } from '../../../components/ui/PaginationControls';
+import { PrescriptionStatusFilter } from '../../../components/ui/PrescriptionStatusFilter';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { apiFetch } from '../../../lib/api';
 import { formatDateTime } from '../../../lib/format';
 import { getSession } from '../../../lib/session';
-import type { Prescription } from '../../../types/prescription';
+import type {
+  PaginatedPrescriptionsResponse,
+  PaginationMeta,
+  Prescription,
+  PrescriptionStatusFilter as PrescriptionStatusFilterValue,
+} from '../../../types/prescription';
+
+const PAGE_SIZE = 5;
+
+const initialMeta: PaginationMeta = {
+  page: 1,
+  limit: PAGE_SIZE,
+  total: 0,
+  totalPages: 0,
+};
 
 export default function DoctorPrescriptionsPage() {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [meta, setMeta] = useState<PaginationMeta>(initialMeta);
+  const [statusFilter, setStatusFilter] =
+    useState<PrescriptionStatusFilterValue>('ALL');
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    async function loadPrescriptions() {
-      const session = getSession();
+  const loadPrescriptions = useCallback(async () => {
+    const session = getSession();
 
-      if (!session) {
-        return;
-      }
-
-      try {
-        const data = await apiFetch<Prescription[]>('/prescriptions', {
-          token: session.accessToken,
-        });
-
-        setPrescriptions(data);
-      } catch (requestError) {
-        const message =
-          requestError instanceof Error
-            ? requestError.message
-            : 'No se pudieron cargar las prescripciones';
-
-        setError(message);
-      } finally {
-        setIsLoading(false);
-      }
+    if (!session) {
+      return;
     }
 
-    loadPrescriptions();
+    setIsLoading(true);
+    setError('');
+
+    const query = new URLSearchParams({
+      page: String(page),
+      limit: String(PAGE_SIZE),
+    });
+
+    if (statusFilter !== 'ALL') {
+      query.set('status', statusFilter);
+    }
+
+    try {
+      const response = await apiFetch<PaginatedPrescriptionsResponse>(
+        `/prescriptions?${query.toString()}`,
+        {
+          token: session.accessToken,
+        },
+      );
+
+      setPrescriptions(response.data);
+      setMeta(response.meta);
+    } catch (requestError) {
+      const message =
+        requestError instanceof Error
+          ? requestError.message
+          : 'No se pudieron cargar las prescripciones';
+
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, statusFilter]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('created') === '1') {
+      setSuccessMessage('Prescripción creada correctamente.');
+      window.history.replaceState(null, '', '/doctor/prescriptions');
+    }
   }, []);
+
+  useEffect(() => {
+    loadPrescriptions();
+  }, [loadPrescriptions]);
+
+  function handleStatusChange(nextStatus: PrescriptionStatusFilterValue) {
+    setStatusFilter(nextStatus);
+    setPage(1);
+    setSuccessMessage('');
+  }
+
+  function handlePreviousPage() {
+    setPage((currentPage) => Math.max(currentPage - 1, 1));
+    setSuccessMessage('');
+  }
+
+  function handleNextPage() {
+    setPage((currentPage) => currentPage + 1);
+    setSuccessMessage('');
+  }
 
   return (
     <AppShell
@@ -55,7 +119,7 @@ export default function DoctorPrescriptionsPage() {
         <div>
           <h2 className="text-lg font-semibold text-slate-950">Mis prescripciones</h2>
           <p className="text-sm text-slate-600">
-            Crea y revisa las prescripciones asignadas a tus pacientes.
+            Crea, filtra y revisa las prescripciones asignadas a tus pacientes.
           </p>
         </div>
 
@@ -64,29 +128,37 @@ export default function DoctorPrescriptionsPage() {
         </Link>
       </div>
 
+      {successMessage ? (
+        <Alert variant="success" className="mb-5">
+          {successMessage}
+        </Alert>
+      ) : null}
+
       <Card>
-        <CardHeader
-          title="Listado"
-          description="Las prescripciones se filtran desde backend según el médico autenticado."
-        />
+        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <CardHeader
+            title="Listado"
+            description="Las prescripciones se filtran desde backend según el médico autenticado."
+          />
+
+          <PrescriptionStatusFilter
+            value={statusFilter}
+            disabled={isLoading}
+            onChange={handleStatusChange}
+          />
+        </div>
 
         {isLoading ? (
           <p className="text-sm text-slate-600">Cargando prescripciones...</p>
         ) : null}
 
-        {error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
+        {error ? <Alert variant="error">{error}</Alert> : null}
 
         {!isLoading && !error && prescriptions.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
-            <p className="font-medium text-slate-900">No hay prescripciones todavía</p>
-            <p className="mt-1 text-sm text-slate-600">
-              Crea la primera prescripción para un paciente existente.
-            </p>
-          </div>
+          <EmptyState
+            title={getEmptyTitle(statusFilter)}
+            description={getEmptyDescription(statusFilter)}
+          />
         ) : null}
 
         {!isLoading && !error && prescriptions.length > 0 ? (
@@ -119,14 +191,50 @@ export default function DoctorPrescriptionsPage() {
                     <td className="px-4 py-3 text-slate-700">
                       {formatDateTime(prescription.createdAt)}
                     </td>
-                    <td className="px-4 py-3 text-slate-700">{prescription.items.length}</td>
+                    <td className="px-4 py-3 text-slate-700">
+                      {prescription.items.length}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            <PaginationControls
+              page={meta.page}
+              limit={meta.limit}
+              total={meta.total}
+              totalPages={meta.totalPages}
+              isLoading={isLoading}
+              onPrevious={handlePreviousPage}
+              onNext={handleNextPage}
+            />
           </div>
         ) : null}
       </Card>
     </AppShell>
   );
+}
+
+function getEmptyTitle(statusFilter: PrescriptionStatusFilterValue) {
+  if (statusFilter === 'PENDING') {
+    return 'No hay prescripciones pendientes';
+  }
+
+  if (statusFilter === 'CONSUMED') {
+    return 'No hay prescripciones consumidas';
+  }
+
+  return 'No hay prescripciones todavía';
+}
+
+function getEmptyDescription(statusFilter: PrescriptionStatusFilterValue) {
+  if (statusFilter === 'PENDING') {
+    return 'Cuando existan recetas pendientes, aparecerán en este listado.';
+  }
+
+  if (statusFilter === 'CONSUMED') {
+    return 'Cuando los pacientes consuman recetas, aparecerán en este listado.';
+  }
+
+  return 'Crea la primera prescripción para un paciente existente.';
 }
