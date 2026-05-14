@@ -23,7 +23,7 @@ La aplicación permite operar el flujo principal desde el navegador: login por r
 
 | Recurso | URL |
 |---|---|
-| Frontend | https://prescripciones-99mftca6z-cristofer-guillen-s-projects.vercel.app/ |
+| Frontend | https://prescripciones-mvp.vercel.app |
 | Backend API | https://prescripciones-mvp.onrender.com |
 | Repositorio | https://github.com/CristoferGuillen/prescripciones-mvp |
 

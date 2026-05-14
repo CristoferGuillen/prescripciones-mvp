@@ -30,7 +30,7 @@ El proyecto fue construido con enfoque MVP: una entrega funcional, clara, demost
 
 | Recurso | URL |
 |---|---|
-| Frontend | https://prescripciones-99mftca6z-cristofer-guillen-s-projects.vercel.app/ |
+| Frontend | https://prescripciones-mvp.vercel.app |
 | Backend API | https://prescripciones-mvp.onrender.com |
 | Repositorio | https://github.com/CristoferGuillen/prescripciones-mvp |
 
@@ -248,7 +248,7 @@ El backend centraliza la seguridad y las reglas del sistema. El frontend consume
 
 | Componente | Plataforma | URL / Configuración |
 |---|---|---|
-| Frontend | Vercel | https://prescripciones-99mftca6z-cristofer-guillen-s-projects.vercel.app/ |
+| Frontend | Vercel | https://prescripciones-mvp.vercel.app |
 | Backend API | Render | https://prescripciones-mvp.onrender.com |
 | Base de datos | Neon PostgreSQL | `DATABASE_URL` configurado en Render |
 
