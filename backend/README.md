@@ -1,98 +1,330 @@
+# Prescripciones Médicas API
+
+![Node.js](https://img.shields.io/badge/Node.js-Runtime-339933?style=flat-square&logo=node.js&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-API-E0234E?style=flat-square&logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-Backend-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-Authentication-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
+![PDF](https://img.shields.io/badge/PDF-pdfkit-red?style=flat-square)
+![Status](https://img.shields.io/badge/Status-API%20Funcional-success?style=flat-square)
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=nestjs,typescript,postgres,prisma,nodejs,git&theme=light" alt="Tecnologías usadas en la API de Prescripciones Médicas" />
+  </a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**Prescripciones Médicas API** es el backend del proyecto **Prescripciones Médicas MVP**. Expone una API REST construida con **NestJS**, **Prisma** y **PostgreSQL** para gestionar autenticación, roles, usuarios demo, prescripciones, consumo de recetas, generación de PDF, filtros, paginación y métricas administrativas.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Esta API concentra las reglas de negocio y seguridad del sistema. El frontend consume sus endpoints para operar el flujo médico-paciente-administrador desde el navegador.
 
-## Description
+## Tabla de contenidos
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Descripción general](#descripción-general)
+- [Tecnologías](#tecnologías)
+- [Módulos principales](#módulos-principales)
+- [Modelo de permisos](#modelo-de-permisos)
+- [Variables de entorno](#variables-de-entorno)
+- [Instalación](#instalación)
+- [Base de datos](#base-de-datos)
+- [Ejecución local](#ejecución-local)
+- [Usuarios demo](#usuarios-demo)
+- [Endpoints principales](#endpoints-principales)
+- [Respuesta paginada](#respuesta-paginada)
+- [PDF de prescripción](#pdf-de-prescripción)
+- [Métricas administrativas](#métricas-administrativas)
+- [Reglas de negocio](#reglas-de-negocio)
+- [Comandos útiles](#comandos-útiles)
+- [Estado](#estado)
 
-## Project setup
+## Descripción general
 
-```bash
-$ npm install
+El backend permite cubrir el flujo principal del MVP:
+
+| Paso | Actor | Acción backend |
+|---|---|---|
+| 1 | Usuario | Inicia sesión y recibe tokens |
+| 2 | Médico | Consulta pacientes disponibles |
+| 3 | Médico | Crea una prescripción |
+| 4 | Paciente | Lista sus prescripciones |
+| 5 | Paciente | Consulta el detalle de una prescripción |
+| 6 | Paciente | Marca la prescripción como consumida |
+| 7 | Paciente | Descarga o visualiza el PDF |
+| 8 | Admin | Consulta métricas generales |
+
+La seguridad principal vive en esta API: autenticación JWT, guards por rol y validación de acceso por propietario del recurso.
+
+## Tecnologías
+
+- **Node.js**
+- **NestJS**
+- **TypeScript**
+- **Prisma ORM**
+- **PostgreSQL**
+- **JWT**
+- **Passport**
+- **bcrypt**
+- **pdfkit**
+- **class-validator**
+- **class-transformer**
+
+## Módulos principales
+
+| Módulo | Responsabilidad |
+|---|---|
+| `auth` | Login, refresh token, perfil autenticado y estrategia JWT |
+| `users` | Consulta de usuarios filtrados por rol |
+| `prescriptions` | Creación, listado, filtros, paginación, detalle, consumo y PDF |
+| `admin` | Métricas administrativas del sistema |
+| `prisma` | Conexión centralizada con la base de datos |
+| `common` | Guards, decoradores y tipos compartidos |
+
+## Modelo de permisos
+
+| Rol | Permisos principales |
+|---|---|
+| `ADMIN` | Consulta métricas y tiene visibilidad global de prescripciones |
+| `DOCTOR` | Consulta pacientes, crea prescripciones y lista recetas creadas por su perfil |
+| `PATIENT` | Lista sus prescripciones, consulta detalle, consume recetas propias y descarga PDF |
+
+## Variables de entorno
+
+Crea el archivo:
+
+```txt
+backend/.env
 ```
 
-## Compile and run the project
+Puedes copiarlo desde:
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```txt
+backend/.env.example
 ```
 
-## Run tests
+Configuración sugerida:
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/prescripciones_mvp?schema=public"
+JWT_ACCESS_SECRET="change_me_access_secret"
+JWT_REFRESH_SECRET="change_me_refresh_secret"
+JWT_ACCESS_EXPIRES_IN="15m"
+JWT_REFRESH_EXPIRES_IN="7d"
+PORT=3001
 ```
 
-## Deployment
+Ajusta usuario, contraseña, host, puerto o nombre de base de datos según tu entorno local.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Instalación
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Desde la carpeta `backend`:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Base de datos
 
-## Resources
+Ejecutar migraciones:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+npm run prisma:migrate
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Ejecutar seed:
 
-## Support
+```bash
+npm run prisma:seed
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Abrir Prisma Studio:
 
-## Stay in touch
+```bash
+npm run prisma:studio
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Reconstruir la base local y volver a cargar datos iniciales:
 
-## License
+```bash
+npx prisma migrate reset
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+El seed crea usuarios demo, perfiles de médico/paciente y prescripciones distribuidas entre estados `PENDING` y `CONSUMED`.
+
+## Ejecución local
+
+Modo desarrollo:
+
+```bash
+npm run start:dev
+```
+
+La API queda disponible en:
+
+```txt
+http://localhost:3001
+```
+
+Compilar backend:
+
+```bash
+npm run build
+```
+
+Ejecutar build compilado:
+
+```bash
+npm run start:prod
+```
+
+## Usuarios demo
+
+| Rol | Email | Password |
+|---|---|---|
+| ADMIN | `admin@test.com` | `admin123` |
+| DOCTOR | `doctor@test.com` | `doctor123` |
+| PATIENT | `patient@test.com` | `patient123` |
+| PATIENT | `patient2@test.com` | `patient123` |
+
+## Endpoints principales
+
+### Auth
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
+| `POST` | `/auth/login` | Público | Inicia sesión y devuelve tokens |
+| `POST` | `/auth/refresh` | Público | Genera un nuevo access token |
+| `GET` | `/auth/profile` | Autenticado | Devuelve el usuario autenticado |
+
+### Users
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
+| `GET` | `/users?role=PATIENT` | ADMIN, DOCTOR | Lista pacientes disponibles para crear prescripciones |
+
+### Prescriptions
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
+| `POST` | `/prescriptions` | ADMIN, DOCTOR | Crea una prescripción |
+| `GET` | `/prescriptions` | ADMIN, DOCTOR, PATIENT | Lista prescripciones según rol |
+| `GET` | `/prescriptions?status=PENDING` | ADMIN, DOCTOR, PATIENT | Lista prescripciones pendientes según rol |
+| `GET` | `/prescriptions?status=CONSUMED` | ADMIN, DOCTOR, PATIENT | Lista prescripciones consumidas según rol |
+| `GET` | `/prescriptions?page=1&limit=10` | ADMIN, DOCTOR, PATIENT | Lista prescripciones con paginación simple |
+| `GET` | `/prescriptions/:id` | ADMIN, DOCTOR, PATIENT | Consulta detalle con validación de permisos |
+| `PATCH` | `/prescriptions/:id/consume` | ADMIN, PATIENT | Marca una prescripción como consumida |
+| `GET` | `/prescriptions/:id/pdf` | ADMIN, DOCTOR, PATIENT | Descarga PDF de la prescripción |
+
+### Admin
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
+| `GET` | `/admin/metrics` | ADMIN | Devuelve métricas generales del sistema |
+
+## Respuesta paginada
+
+`GET /prescriptions` devuelve una estructura paginada:
+
+```json
+{
+  "data": [],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 9,
+    "totalPages": 1
+  }
+}
+```
+
+Parámetros soportados:
+
+| Parámetro | Ejemplo | Descripción |
+|---|---|---|
+| `status` | `PENDING` | Filtra por estado |
+| `page` | `1` | Página actual |
+| `limit` | `10` | Cantidad de registros por página |
+
+## PDF de prescripción
+
+El endpoint:
+
+```txt
+GET /prescriptions/:id/pdf
+```
+
+genera un documento PDF con:
+
+- código de prescripción;
+- ID;
+- fecha de emisión;
+- estado;
+- fecha de consumo;
+- datos del paciente;
+- datos del médico;
+- notas;
+- medicamentos;
+- dosis;
+- frecuencia;
+- duración;
+- instrucciones.
+
+## Métricas administrativas
+
+El endpoint:
+
+```txt
+GET /admin/metrics
+```
+
+devuelve:
+
+```json
+{
+  "totals": {
+    "doctors": 1,
+    "patients": 2,
+    "prescriptions": 9
+  },
+  "byStatus": {
+    "pending": 4,
+    "consumed": 5
+  },
+  "byDay": [
+    {
+      "date": "2026-05-14",
+      "count": 4
+    }
+  ]
+}
+```
+
+## Reglas de negocio
+
+- Las rutas sensibles requieren JWT.
+- El backend valida roles con guards.
+- El paciente solo puede acceder a sus propias prescripciones.
+- El paciente no puede consumir prescripciones ajenas.
+- Una prescripción consumida no puede consumirse dos veces.
+- El médico solo lista prescripciones creadas por él.
+- El PDF reutiliza la validación de permisos del detalle.
+- Las métricas administrativas requieren rol `ADMIN`.
+- Los filtros y la paginación respetan las reglas de acceso por rol.
+
+## Comandos útiles
+
+| Comando | Descripción |
+|---|---|
+| `npm run start:dev` | Ejecuta la API en modo desarrollo |
+| `npm run build` | Compila el backend |
+| `npm run start:prod` | Ejecuta el backend compilado |
+| `npm run prisma:migrate` | Ejecuta migraciones Prisma |
+| `npm run prisma:seed` | Carga datos iniciales |
+| `npm run prisma:studio` | Abre Prisma Studio |
+| `npm run test` | Ejecuta tests configurados por NestJS |
+
+## Estado
+
+API funcional para el MVP de prescripciones médicas.
+
+Incluye autenticación, roles, prescripciones, PDF, métricas, seed demo, filtros por estado y paginación simple.

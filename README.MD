@@ -8,6 +8,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-Authentication-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-UI-38B2AC?style=flat-square&logo=tailwindcss&logoColor=white)
+![PDF](https://img.shields.io/badge/PDF-pdfkit-red?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-MVP%20Funcional-success?style=flat-square)
 ![Technical Test](https://img.shields.io/badge/Prueba-T%C3%A9cnica-blueviolet?style=flat-square)
 
@@ -19,9 +20,11 @@
 
 **Prescripciones Médicas MVP** es una aplicación full stack desarrollada como prueba técnica para gestionar un flujo digital de prescripciones médicas entre administradores, médicos y pacientes.
 
-El sistema permite autenticar usuarios por rol, crear prescripciones desde el perfil médico, consultar recetas desde el perfil paciente, marcar prescripciones como consumidas, descargar un PDF generado desde backend y visualizar métricas operativas desde un dashboard administrativo.
+El sistema permite autenticar usuarios por rol, crear prescripciones desde el perfil médico, consultar recetas desde el perfil paciente, filtrar y paginar listados, marcar prescripciones como consumidas, ver o descargar un PDF generado desde backend y visualizar métricas operativas desde un dashboard administrativo.
 
-El proyecto fue construido con un enfoque MVP: una entrega funcional, clara, demostrable y orientada a validar el flujo principal de extremo a extremo.
+El proyecto fue construido con enfoque MVP: una entrega funcional, clara, demostrable y orientada a validar el flujo principal de extremo a extremo, con mejoras adicionales de experiencia de usuario, documentación y datos demo.
+
+---
 
 ## Tabla de contenidos
 
@@ -41,25 +44,31 @@ El proyecto fue construido con un enfoque MVP: una entrega funcional, clara, dem
 - [Credenciales de prueba](#credenciales-de-prueba)
 - [Rutas del frontend](#rutas-del-frontend)
 - [Endpoints principales](#endpoints-principales)
+- [Respuesta paginada de prescripciones](#respuesta-paginada-de-prescripciones)
 - [Flujo de prueba recomendado](#flujo-de-prueba-recomendado)
 - [Comandos útiles](#comandos-útiles)
 - [Seguridad y permisos](#seguridad-y-permisos)
+- [Documentación adicional](#documentación-adicional)
 - [Evidencia QA](#evidencia-qa)
 - [Estado de entrega](#estado-de-entrega)
 - [Proyección del producto](#proyección-del-producto)
 - [Autor](#autor)
 
+---
+
 ## Descripción general
 
-Prescripciones Médicas MVP centraliza el proceso básico de emisión, consulta y consumo de recetas médicas digitales.
+Prescripciones Médicas MVP centraliza el proceso básico de emisión, consulta, consumo y descarga de recetas médicas digitales.
 
 La aplicación está organizada en tres experiencias principales:
 
-- **Administrador:** consulta métricas generales del sistema.
-- **Médico:** revisa sus prescripciones y crea nuevas recetas para pacientes existentes.
-- **Paciente:** consulta sus prescripciones, revisa el detalle, marca recetas como consumidas y descarga el PDF correspondiente.
+- **Administrador:** consulta métricas generales del sistema desde un dashboard visual.
+- **Médico:** revisa, filtra y pagina sus prescripciones; también crea nuevas recetas para pacientes existentes.
+- **Paciente:** consulta sus prescripciones, filtra por estado, revisa el detalle, confirma el consumo de recetas y puede ver o descargar el PDF correspondiente.
 
 El sistema prioriza una experiencia sobria y directa, con reglas de negocio protegidas desde backend y una interfaz web preparada para demostrar el flujo completo sin depender de herramientas externas como Postman.
+
+---
 
 ## Objetivo de la prueba técnica
 
@@ -71,7 +80,8 @@ El objetivo de esta prueba técnica fue construir un MVP full stack que demuestr
 - reglas de negocio desde backend;
 - consumo de API REST desde frontend;
 - generación de PDF;
-- manejo de estados;
+- filtros y paginación simple;
+- manejo de estados y feedback visual;
 - dashboard administrativo;
 - documentación técnica;
 - validación manual del flujo principal.
@@ -81,13 +91,17 @@ El flujo funcional principal es:
 | Paso | Actor | Acción |
 |---|---|---|
 | 1 | Médico | Inicia sesión |
-| 2 | Médico | Crea una prescripción para un paciente existente |
-| 3 | Paciente | Inicia sesión |
-| 4 | Paciente | Consulta la prescripción asignada |
-| 5 | Paciente | Marca la prescripción como consumida |
-| 6 | Paciente | Descarga el PDF de la prescripción |
-| 7 | Administrador | Inicia sesión |
-| 8 | Administrador | Revisa métricas actualizadas |
+| 2 | Médico | Consulta, filtra y pagina sus prescripciones |
+| 3 | Médico | Crea una prescripción para un paciente existente |
+| 4 | Paciente | Inicia sesión |
+| 5 | Paciente | Consulta y filtra sus prescripciones |
+| 6 | Paciente | Abre el detalle de la prescripción |
+| 7 | Paciente | Confirma y marca la prescripción como consumida |
+| 8 | Paciente | Ver o descarga el PDF de la prescripción |
+| 9 | Administrador | Inicia sesión |
+| 10 | Administrador | Revisa métricas actualizadas |
+
+---
 
 ## Tecnologías
 
@@ -120,6 +134,8 @@ El flujo funcional principal es:
 - **Prisma CLI**
 - **PowerShell para pruebas manuales**
 - **Git / GitHub**
+
+---
 
 ## Funcionalidades principales
 
@@ -158,15 +174,25 @@ El flujo funcional principal es:
   - duración;
   - instrucciones.
 - Listado de prescripciones filtrado por rol.
+- Filtro por estado:
+  - todas;
+  - pendientes;
+  - consumidas.
+- Paginación simple en backend y frontend.
 - Detalle de prescripción.
 - Cambio de estado de `PENDING` a `CONSUMED`.
+- Confirmación antes de consumir.
 - Prevención de consumo duplicado.
 - Validación de acceso a prescripciones propias.
+- Estados vacíos contextuales.
+- Mensajes de éxito y error en acciones principales.
 
 ### PDF de prescripción
 
 - Generación de PDF desde backend.
 - Descarga protegida por permisos.
+- Visualización del PDF desde frontend en nueva pestaña.
+- Descarga del PDF desde frontend.
 - Documento con:
   - código de prescripción;
   - ID;
@@ -185,16 +211,35 @@ El flujo funcional principal es:
 - Total de prescripciones.
 - Conteo de prescripciones pendientes.
 - Conteo de prescripciones consumidas.
+- Porcentaje de pendientes.
+- Porcentaje de consumidas.
+- Barra visual de progreso de consumo.
+- Resumen operativo.
+- Promedio diario.
+- Día con más recetas.
 - Tabla de prescripciones por día.
+- Participación porcentual por día.
+- Última actualización.
 - Botón para actualizar métricas.
+
+### Documentación
+
+- README principal del proyecto.
+- README específico de backend.
+- README específico de frontend.
+- Evidencias QA por sprint funcional.
+
+---
 
 ## Roles del sistema
 
 | Rol | Descripción | Funciones principales |
 |---|---|---|
 | `ADMIN` | Usuario administrativo | Consulta dashboard de métricas y tiene visibilidad global del sistema |
-| `DOCTOR` | Médico emisor | Crea prescripciones, lista sus recetas y puede descargar PDFs propios |
-| `PATIENT` | Paciente receptor | Consulta sus recetas, revisa detalle, marca como consumida y descarga PDF |
+| `DOCTOR` | Médico emisor | Crea prescripciones, lista y filtra sus recetas, pagina resultados y puede descargar PDFs propios |
+| `PATIENT` | Paciente receptor | Consulta sus recetas, filtra por estado, revisa detalle, confirma consumo, ve PDF y descarga PDF |
+
+---
 
 ## Modelo del dominio
 
@@ -225,16 +270,20 @@ El sistema está organizado alrededor de entidades simples y enfocadas en el flu
 | `PENDING` | Prescripción pendiente de consumo |
 | `CONSUMED` | Prescripción marcada como consumida |
 
+---
+
 ## Arquitectura del proyecto
 
 El proyecto está separado en dos aplicaciones principales:
 
 | Aplicación | Tecnología | Responsabilidad |
 |---|---|---|
-| `backend` | NestJS | API REST, autenticación, roles, reglas de negocio, Prisma, PDF y métricas |
-| `frontend` | Next.js | Interfaz web, login, navegación por rol, consumo de API y flujo visual |
+| `backend` | NestJS | API REST, autenticación, roles, reglas de negocio, Prisma, PDF, filtros, paginación y métricas |
+| `frontend` | Next.js | Interfaz web, login, navegación por rol, consumo de API, filtros, paginación y flujo visual |
 
 El backend centraliza la seguridad y las reglas del sistema. El frontend consume la API y presenta una experiencia clara para cada rol.
+
+---
 
 ## Estructura del repositorio
 
@@ -254,6 +303,7 @@ prescripciones-mvp/
 │   │   ├── app.module.ts
 │   │   └── main.ts
 │   ├── .env.example
+│   ├── README.md
 │   └── package.json
 │
 ├── frontend/
@@ -264,6 +314,7 @@ prescripciones-mvp/
 │   │   ├── lib/
 │   │   └── types/
 │   ├── .env.example
+│   ├── README.md
 │   └── package.json
 │
 ├── docs/
@@ -271,6 +322,8 @@ prescripciones-mvp/
 ├── .gitignore
 └── README.md
 ```
+
+---
 
 ## Requisitos previos
 
@@ -286,6 +339,8 @@ Base de datos local recomendada:
 ```text
 prescripciones_mvp
 ```
+
+---
 
 ## Instalación
 
@@ -314,6 +369,8 @@ Instala dependencias del frontend:
 cd ../frontend
 npm install
 ```
+
+---
 
 ## Configuración
 
@@ -366,6 +423,8 @@ Configura la URL del backend:
 NEXT_PUBLIC_API_URL="http://localhost:3001"
 ```
 
+---
+
 ## Base de datos
 
 Desde la carpeta `backend`, ejecuta las migraciones:
@@ -386,7 +445,9 @@ También puedes reconstruir la base de datos local y volver a cargar el seed con
 npx prisma migrate reset
 ```
 
-El seed crea usuarios de prueba, perfiles médicos y pacientes, además de prescripciones demo para validar los flujos desde el primer arranque.
+El seed crea usuarios de prueba, perfiles médicos y pacientes, además de prescripciones demo distribuidas por estado para validar listados, filtros, métricas y flujo completo desde el primer arranque.
+
+---
 
 ## Ejecución local
 
@@ -416,6 +477,8 @@ Frontend disponible en:
 http://localhost:3000
 ```
 
+---
+
 ## Credenciales de prueba
 
 | Rol | Email | Password | Ruta esperada |
@@ -425,17 +488,21 @@ http://localhost:3000
 | Paciente | `patient@test.com` | `patient123` | `/patient/prescriptions` |
 | Paciente 2 | `patient2@test.com` | `patient123` | `/patient/prescriptions` |
 
+---
+
 ## Rutas del frontend
 
 | Ruta | Acceso | Descripción |
 |---|---|---|
 | `/` | Público | Redirige a login |
 | `/login` | Público | Inicio de sesión |
-| `/admin` | ADMIN | Dashboard administrativo |
-| `/doctor/prescriptions` | DOCTOR | Listado de prescripciones del médico |
+| `/admin` | ADMIN | Dashboard administrativo mejorado |
+| `/doctor/prescriptions` | DOCTOR | Listado de prescripciones del médico con filtros y paginación |
 | `/doctor/prescriptions/new` | DOCTOR | Crear nueva prescripción |
-| `/patient/prescriptions` | PATIENT | Listado de prescripciones del paciente |
-| `/patient/prescriptions/:id` | PATIENT | Detalle, consumo y descarga PDF |
+| `/patient/prescriptions` | PATIENT | Listado de prescripciones del paciente con filtros y paginación |
+| `/patient/prescriptions/:id` | PATIENT | Detalle, consumo con confirmación, ver PDF y descargar PDF |
+
+---
 
 ## Endpoints principales
 
@@ -459,6 +526,9 @@ http://localhost:3000
 |---|---|---|---|
 | `POST` | `/prescriptions` | ADMIN, DOCTOR | Crea una prescripción |
 | `GET` | `/prescriptions` | ADMIN, DOCTOR, PATIENT | Lista prescripciones según rol |
+| `GET` | `/prescriptions?status=PENDING` | ADMIN, DOCTOR, PATIENT | Lista prescripciones pendientes según rol |
+| `GET` | `/prescriptions?status=CONSUMED` | ADMIN, DOCTOR, PATIENT | Lista prescripciones consumidas según rol |
+| `GET` | `/prescriptions?page=1&limit=10` | ADMIN, DOCTOR, PATIENT | Lista prescripciones con paginación simple |
 | `GET` | `/prescriptions/:id` | ADMIN, DOCTOR, PATIENT | Muestra detalle con validación de permisos |
 | `PATCH` | `/prescriptions/:id/consume` | ADMIN, PATIENT | Marca una prescripción como consumida |
 | `GET` | `/prescriptions/:id/pdf` | ADMIN, DOCTOR, PATIENT | Descarga PDF con validación de permisos |
@@ -469,6 +539,34 @@ http://localhost:3000
 |---|---|---|---|
 | `GET` | `/admin/metrics` | ADMIN | Devuelve métricas generales del sistema |
 
+---
+
+## Respuesta paginada de prescripciones
+
+`GET /prescriptions` devuelve:
+
+```json
+{
+  "data": [],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 9,
+    "totalPages": 1
+  }
+}
+```
+
+Parámetros soportados:
+
+| Parámetro | Ejemplo | Descripción |
+|---|---|---|
+| `status` | `PENDING` | Filtra por estado |
+| `page` | `1` | Página actual |
+| `limit` | `10` | Cantidad de registros por página |
+
+---
+
 ## Flujo de prueba recomendado
 
 ### 1. Médico crea una prescripción
@@ -478,11 +576,16 @@ http://localhost:3000
    - `doctor@test.com`
    - `doctor123`
 3. Ir a `/doctor/prescriptions`.
-4. Hacer clic en **Nueva prescripción**.
-5. Seleccionar `patient@test.com`.
-6. Completar notas y medicamentos.
-7. Crear la prescripción.
-8. Confirmar que aparece en el listado médico.
+4. Probar filtros:
+   - Todas.
+   - Pendientes.
+   - Consumidas.
+5. Probar paginación si existen más registros que el límite visual.
+6. Hacer clic en **Nueva prescripción**.
+7. Seleccionar `patient@test.com`.
+8. Completar notas y medicamentos.
+9. Crear la prescripción.
+10. Confirmar que aparece el mensaje de éxito y que la receta aparece en el listado médico.
 
 ### 2. Paciente consume la prescripción
 
@@ -491,11 +594,18 @@ http://localhost:3000
    - `patient@test.com`
    - `patient123`
 3. Ir a `/patient/prescriptions`.
-4. Abrir el detalle de la prescripción.
-5. Revisar médico, paciente, notas y medicamentos.
-6. Marcar la prescripción como consumida.
-7. Descargar el PDF.
-8. Verificar que el PDF abre correctamente.
+4. Probar filtros:
+   - Todas.
+   - Pendientes.
+   - Consumidas.
+5. Abrir el detalle de la prescripción.
+6. Revisar médico, paciente, notas y medicamentos.
+7. Hacer clic en **Marcar como consumida**.
+8. Cancelar una vez para validar que no se consume.
+9. Repetir y confirmar la acción.
+10. Verificar que el estado cambie a `CONSUMED`.
+11. Usar **Ver PDF**.
+12. Usar **Descargar PDF**.
 
 ### 3. Admin revisa métricas
 
@@ -504,8 +614,18 @@ http://localhost:3000
    - `admin@test.com`
    - `admin123`
 3. Entrar a `/admin`.
-4. Revisar totales, conteo por estado y tabla por día.
+4. Revisar:
+   - totales;
+   - conteo por estado;
+   - porcentajes;
+   - barra visual;
+   - promedio diario;
+   - día con más recetas;
+   - tabla por día;
+   - última actualización.
 5. Usar el botón **Actualizar métricas**.
+
+---
 
 ## Comandos útiles
 
@@ -573,6 +693,8 @@ Ejecutar build en modo producción:
 npm run start
 ```
 
+---
+
 ## Seguridad y permisos
 
 La seguridad principal está implementada en backend.
@@ -597,6 +719,21 @@ La seguridad principal está implementada en backend.
 - Médicos solo listan prescripciones creadas por ellos.
 - Médicos crean prescripciones para pacientes existentes.
 - Administradores acceden al dashboard de métricas.
+- Los filtros y la paginación respetan el rol autenticado.
+- El PDF usa la misma validación de acceso del detalle.
+
+---
+
+## Documentación adicional
+
+Además de este README principal, el repositorio incluye documentación específica por aplicación:
+
+| Archivo | Propósito |
+|---|---|
+| `backend/README.md` | Documentación específica de la API NestJS |
+| `frontend/README.md` | Documentación específica de la interfaz Next.js |
+
+---
 
 ## Evidencia QA
 
@@ -615,10 +752,15 @@ Archivos actuales:
 | `sprint 4.md` | PDF y métricas admin |
 | `sprint 5.md` | Login frontend, sesión y rutas por rol |
 | `sprint 6.md` | Flujo médico-paciente en frontend |
+| `sprint 7.md` | Seed demo, filtros y paginación backend |
+| `sprint 8.md` | Listados frontend con filtros, paginación y feedback |
+| `sprint 9.md` | Detalle del paciente, confirmación de consumo y acciones PDF |
+
+---
 
 ## Estado de entrega
 
-MVP completado y validado manualmente.
+MVP completado, mejorado y validado manualmente.
 
 | Módulo | Estado |
 |---|---|
@@ -627,15 +769,26 @@ MVP completado y validado manualmente.
 | Auth JWT | Completado |
 | RBAC | Completado |
 | Prescripciones backend | Completado |
+| Filtros backend | Completado |
+| Paginación backend | Completado |
 | PDF backend | Completado |
 | Métricas admin backend | Completado |
 | Login frontend | Completado |
 | Rutas por rol | Completado |
 | Flujo médico frontend | Completado |
 | Flujo paciente frontend | Completado |
-| Dashboard admin frontend | Completado |
-| README | Completado |
+| Filtros frontend | Completado |
+| Paginación frontend | Completado |
+| Confirmación de consumo | Completado |
+| Ver PDF desde frontend | Completado |
+| Descargar PDF desde frontend | Completado |
+| Dashboard admin frontend mejorado | Completado |
+| README principal | Completado |
+| README backend | Completado |
+| README frontend | Completado |
 | QA manual | Completado |
+
+---
 
 ## Proyección del producto
 
@@ -645,8 +798,7 @@ Posibles siguientes mejoras:
 
 - administración visual de usuarios;
 - catálogo de medicamentos;
-- filtros y búsqueda avanzada;
-- paginación de listados;
+- búsqueda avanzada;
 - auditoría de acciones;
 - firma digital;
 - QR de validación;
@@ -654,6 +806,8 @@ Posibles siguientes mejoras:
 - despliegue productivo;
 - pruebas automatizadas;
 - documentación OpenAPI.
+
+---
 
 ## Autor
 
