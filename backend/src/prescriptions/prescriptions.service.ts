@@ -50,6 +50,18 @@ type PrescriptionWithRelations = Prisma.PrescriptionGetPayload<{
   include: typeof prescriptionInclude;
 }>;
 
+type FindAllPrescriptionsOptions = {
+  status?: string;
+  page?: string;
+  limit?: string;
+};
+
+type PaginationOptions = {
+  page: number;
+  limit: number;
+  skip: number;
+};
+
 @Injectable()
 export class PrescriptionsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -90,16 +102,39 @@ export class PrescriptionsService {
     });
   }
 
-  async findAll(currentUser: AuthUser) {
+  async findAll(currentUser: AuthUser, options: FindAllPrescriptionsOptions = {}) {
     const where = await this.buildWhereByRole(currentUser);
+    const status = this.parsePrescriptionStatus(options.status);
+    const pagination = this.parsePagination(options.page, options.limit);
 
-    return this.prisma.prescription.findMany({
-      where,
-      include: prescriptionInclude,
-      orderBy: {
-        createdAt: 'desc',
+    if (status) {
+      where.status = status;
+    }
+
+    const [total, data] = await this.prisma.$transaction([
+      this.prisma.prescription.count({
+        where,
+      }),
+      this.prisma.prescription.findMany({
+        where,
+        include: prescriptionInclude,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip: pagination.skip,
+        take: pagination.limit,
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page: pagination.page,
+        limit: pagination.limit,
+        total,
+        totalPages: Math.ceil(total / pagination.limit),
       },
-    });
+    };
   }
 
   async findOne(currentUser: AuthUser, id: string) {
@@ -184,7 +219,9 @@ export class PrescriptionsService {
       });
 
       if (!doctor) {
-        throw new BadRequestException('No existe un médico disponible para crear la prescripción');
+        throw new BadRequestException(
+          'No existe un médico disponible para crear la prescripción',
+        );
       }
 
       return doctor.id;
@@ -219,6 +256,41 @@ export class PrescriptionsService {
     throw new ForbiddenException('Rol no permitido');
   }
 
+  private parsePrescriptionStatus(status?: string): PrescriptionStatus | undefined {
+    if (!status) {
+      return undefined;
+    }
+
+    const allowedStatuses = Object.values(PrescriptionStatus);
+
+    if (!allowedStatuses.includes(status as PrescriptionStatus)) {
+      throw new BadRequestException('Estado de prescripción inválido');
+    }
+
+    return status as PrescriptionStatus;
+  }
+
+  private parsePagination(page?: string, limit?: string): PaginationOptions {
+    const parsedPage = page ? Number(page) : 1;
+    const parsedLimit = limit ? Number(limit) : 10;
+
+    if (!Number.isInteger(parsedPage) || parsedPage < 1) {
+      throw new BadRequestException('El parámetro page debe ser un entero mayor o igual a 1');
+    }
+
+    if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
+      throw new BadRequestException('El parámetro limit debe ser un entero mayor o igual a 1');
+    }
+
+    const safeLimit = Math.min(parsedLimit, 50);
+
+    return {
+      page: parsedPage,
+      limit: safeLimit,
+      skip: (parsedPage - 1) * safeLimit,
+    };
+  }
+
   private ensureCanAccessPrescription(
     currentUser: AuthUser,
     prescription: PrescriptionWithRelations,
@@ -231,7 +303,10 @@ export class PrescriptionsService {
       return;
     }
 
-    if (currentUser.role === Role.PATIENT && prescription.patient.userId === currentUser.id) {
+    if (
+      currentUser.role === Role.PATIENT &&
+      prescription.patient.userId === currentUser.id
+    ) {
       return;
     }
 
@@ -246,7 +321,10 @@ export class PrescriptionsService {
       return;
     }
 
-    if (currentUser.role === Role.PATIENT && prescription.patient.userId === currentUser.id) {
+    if (
+      currentUser.role === Role.PATIENT &&
+      prescription.patient.userId === currentUser.id
+    ) {
       return;
     }
 

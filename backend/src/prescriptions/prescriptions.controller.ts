@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -35,14 +36,17 @@ export class PrescriptionsController {
 
   @Get()
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
-  findAll(@CurrentUser() currentUser: AuthUser) {
-    return this.prescriptionsService.findAll(currentUser);
-  }
-
-  @Get(':id')
-  @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
-  findOne(@CurrentUser() currentUser: AuthUser, @Param('id') id: string) {
-    return this.prescriptionsService.findOne(currentUser, id);
+  findAll(
+    @CurrentUser() currentUser: AuthUser,
+    @Query('status') status?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.prescriptionsService.findAll(currentUser, {
+      status,
+      page,
+      limit,
+    });
   }
 
   @Get(':id/pdf')
@@ -62,6 +66,12 @@ export class PrescriptionsController {
     });
 
     response.end(pdfBuffer);
+  }
+
+  @Get(':id')
+  @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
+  findOne(@CurrentUser() currentUser: AuthUser, @Param('id') id: string) {
+    return this.prescriptionsService.findOne(currentUser, id);
   }
 
   @Patch(':id/consume')
