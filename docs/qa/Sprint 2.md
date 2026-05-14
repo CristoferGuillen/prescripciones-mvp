@@ -1,4 +1,3 @@
-@'
 # Sprint 2 - Pruebas manuales de autenticación y RBAC
 
 Fecha: 2026-05-14  
@@ -63,4 +62,3 @@ El backend ya permite:
 ## Nota
 
 No se incluye salida completa de PowerShell porque contiene tokens JWT de sesión local.
-'@ | Set-Content -Encoding UTF8 docs\qa\sprint-2-auth-rbac.md
