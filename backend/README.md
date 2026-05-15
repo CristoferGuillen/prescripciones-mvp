@@ -314,10 +314,10 @@ Respuesta esperada cuando se supera el límite:
 
 ## Swagger / OpenAPI
 
-La API expone documentación interactiva en:
+La API expone documentación interactiva:
 
 ```txt
-http://localhost:3001/api/docs
+https://prescripciones-mvp.onrender.com/api/docs
 ```
 
 Desde Swagger se puede:

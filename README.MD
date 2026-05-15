@@ -34,6 +34,7 @@ El proyecto fue construido con enfoque MVP: una entrega funcional, clara, demost
 | Frontend | https://prescripciones-mvp.vercel.app |
 | Backend API | https://prescripciones-mvp.onrender.com |
 | Swagger / OpenAPI | https://prescripciones-mvp.onrender.com/api/docs |
+| Health check | https://prescripciones-mvp.onrender.com/health |
 | Repositorio | https://github.com/CristoferGuillen/prescripciones-mvp |
 
 ### Credenciales demo
