@@ -27,7 +27,6 @@ La aplicación permite operar el flujo principal desde el navegador: login por r
 | Backend API | https://prescripciones-mvp.onrender.com |
 | Repositorio | https://github.com/CristoferGuillen/prescripciones-mvp |
 
-
 ## Tabla de contenidos
 
 - [Demo frontend](#demo-frontend)
@@ -40,6 +39,7 @@ La aplicación permite operar el flujo principal desde el navegador: login por r
 - [Rutas principales](#rutas-principales)
 - [Credenciales demo](#credenciales-demo)
 - [Flujo principal](#flujo-principal)
+- [Sesión y refresh automático](#sesión-y-refresh-automático)
 - [Componentes principales](#componentes-principales)
 - [Acciones PDF](#acciones-pdf)
 - [Comandos útiles](#comandos-útiles)
@@ -163,6 +163,32 @@ Output Directory: .next
 2. Entra a `/admin`.
 3. Revisa totales, porcentajes, tabla por día y última actualización.
 
+## Sesión y refresh automático
+
+El frontend guarda una sesión MVP en `localStorage` con:
+
+- `accessToken`;
+- `refreshToken`;
+- usuario autenticado.
+
+El cliente API usa el `accessToken` para las peticiones protegidas. Si una petición responde `401 Unauthorized`, intenta renovar la sesión usando:
+
+```txt
+POST /auth/refresh
+```
+
+Cuando el backend devuelve nuevos tokens, el frontend actualiza la sesión local y reintenta la petición original.
+
+Si el refresh token está vencido, revocado o inválido, el frontend limpia la sesión local.
+
+Al cerrar sesión, el frontend llama al backend:
+
+```txt
+POST /auth/logout
+```
+
+Después limpia `localStorage` y redirige a `/login`.
+
 ## Componentes principales
 
 | Carpeta | Propósito |
@@ -192,3 +218,11 @@ Output Directory: .next
 ## Estado
 
 Frontend funcional y desplegado para el MVP de prescripciones médicas.
+
+Últimas mejoras integradas desde backend/frontend:
+
+| Mejora | Estado |
+|---|---|
+| Refresh automático de sesión | Completado |
+| Logout con revocación en backend | Completado |
+| Persistencia actualizada de access token y refresh token | Completado |
