@@ -5,8 +5,10 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -20,6 +22,12 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Throttle({
+    default: {
+      limit: 5,
+      ttl: 60000,
+    },
+  })
   @Post('login')
   @ApiOperation({
     summary: 'Iniciar sesión',
@@ -49,10 +57,20 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     description: 'Credenciales inválidas.',
   })
+  @ApiTooManyRequestsResponse({
+    description:
+      'Demasiados intentos de inicio de sesión. Intenta nuevamente más tarde.',
+  })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
+  @Throttle({
+    default: {
+      limit: 10,
+      ttl: 60000,
+    },
+  })
   @Post('refresh')
   @ApiOperation({
     summary: 'Renovar access token',
@@ -81,6 +99,10 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     description: 'Refresh token inválido o expirado.',
   })
+  @ApiTooManyRequestsResponse({
+    description:
+      'Demasiadas solicitudes de renovación de token. Intenta nuevamente más tarde.',
+  })
   refresh(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refresh(refreshTokenDto);
   }
@@ -106,6 +128,9 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse({
     description: 'Access token ausente, inválido o expirado.',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Demasiadas solicitudes. Intenta nuevamente más tarde.',
   })
   profile(@CurrentUser() user: AuthUser) {
     return this.authService.profile(user);

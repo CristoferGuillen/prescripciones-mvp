@@ -20,8 +20,10 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { PrescriptionStatus, Role } from '@prisma/client';
 import type { Response } from 'express';
 
@@ -86,6 +88,9 @@ export class PrescriptionsController {
   })
   @ApiNotFoundResponse({
     description: 'Paciente no encontrado.',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Demasiadas solicitudes. Intenta nuevamente más tarde.',
   })
   create(
     @CurrentUser() currentUser: AuthUser,
@@ -167,6 +172,9 @@ export class PrescriptionsController {
   @ApiForbiddenResponse({
     description: 'El rol autenticado no tiene acceso al recurso.',
   })
+  @ApiTooManyRequestsResponse({
+    description: 'Demasiadas solicitudes. Intenta nuevamente más tarde.',
+  })
   findAll(
     @CurrentUser() currentUser: AuthUser,
     @Query('status') status?: string,
@@ -182,6 +190,12 @@ export class PrescriptionsController {
 
   @Get(':id/pdf')
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
+  @Throttle({
+    default: {
+      ttl: 60_000,
+      limit: 20,
+    },
+  })
   @Header('Content-Type', 'application/pdf')
   @ApiOperation({
     summary: 'Descargar PDF de una prescripción',
@@ -212,6 +226,10 @@ export class PrescriptionsController {
   })
   @ApiNotFoundResponse({
     description: 'Prescripción no encontrada.',
+  })
+  @ApiTooManyRequestsResponse({
+    description:
+      'Demasiadas descargas de PDF. Intenta nuevamente más tarde.',
   })
   async downloadPdf(
     @CurrentUser() currentUser: AuthUser,
@@ -256,6 +274,9 @@ export class PrescriptionsController {
   @ApiNotFoundResponse({
     description: 'Prescripción no encontrada.',
   })
+  @ApiTooManyRequestsResponse({
+    description: 'Demasiadas solicitudes. Intenta nuevamente más tarde.',
+  })
   findOne(@CurrentUser() currentUser: AuthUser, @Param('id') id: string) {
     return this.prescriptionsService.findOne(currentUser, id);
   }
@@ -283,6 +304,9 @@ export class PrescriptionsController {
   })
   @ApiNotFoundResponse({
     description: 'Prescripción no encontrada.',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Demasiadas solicitudes. Intenta nuevamente más tarde.',
   })
   consume(@CurrentUser() currentUser: AuthUser, @Param('id') id: string) {
     return this.prescriptionsService.consume(currentUser, id);

@@ -18,7 +18,7 @@ function parseCorsOrigins(frontendUrl?: string) {
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  return [...defaultOrigins, ...configuredOrigins];
+  return [...new Set([...defaultOrigins, ...configuredOrigins])];
 }
 
 async function bootstrap() {
@@ -46,7 +46,7 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Prescripciones Médicas MVP API')
     .setDescription(
-      'API REST para la gestión de prescripciones médicas con roles ADMIN, DOCTOR y PATIENT. Incluye autenticación JWT, refresh token, control de acceso por rol, prescripciones, consumo, PDF y métricas administrativas.',
+      'API REST para la gestión de prescripciones médicas con roles ADMIN, DOCTOR y PATIENT. Incluye autenticación JWT, refresh token, control de acceso por rol, prescripciones, consumo, PDF, métricas administrativas y rate limiting básico contra abuso de solicitudes.',
     )
     .setVersion('1.0.0')
     .addBearerAuth(
