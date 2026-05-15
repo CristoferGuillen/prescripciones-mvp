@@ -1,11 +1,17 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react';
 import { useRouter } from 'next/navigation';
+
 import { AppShell } from '../../../../components/layout/AppShell';
 import { Alert } from '../../../../components/ui/Alert';
 import { Button } from '../../../../components/ui/Button';
-import { Card, CardHeader } from '../../../../components/ui/Card';
+import { Card } from '../../../../components/ui/Card';
 import { Input } from '../../../../components/ui/Input';
 import { apiFetch } from '../../../../lib/api';
 import { formatDate } from '../../../../lib/format';
@@ -31,7 +37,9 @@ export default function NewPrescriptionPage() {
   const [patients, setPatients] = useState<UserListItem[]>([]);
   const [patientId, setPatientId] = useState('');
   const [notes, setNotes] = useState('');
-  const [items, setItems] = useState<CreatePrescriptionItemInput[]>([{ ...emptyItem }]);
+  const [items, setItems] = useState<CreatePrescriptionItemInput[]>([
+    { ...emptyItem },
+  ]);
   const [isLoadingPatients, setIsLoadingPatients] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -100,7 +108,7 @@ export default function NewPrescriptionPage() {
     });
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
     const session = getSession();
@@ -147,152 +155,216 @@ export default function NewPrescriptionPage() {
   return (
     <AppShell
       title="Nueva prescripción"
-      description="Crea una prescripción para un paciente existente."
+      description="Completa los datos necesarios para emitir una receta médica digital."
       allowedRoles={['DOCTOR']}
     >
-      <Card>
-        <CardHeader
-          title="Formulario de prescripción"
-          description="Completa los datos mínimos de la receta médica."
-        />
+      <div className="mx-auto max-w-5xl space-y-6">
+        {error ? <Alert variant="error">{error}</Alert> : null}
 
-        {error ? (
-          <Alert variant="error" className="mb-5">
-            {error}
-          </Alert>
-        ) : null}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-700">
-              Paciente
-            </span>
-            <select
-              value={patientId}
-              onChange={(event) => setPatientId(event.target.value)}
-              disabled={isLoadingPatients || patients.length === 0}
-              required
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
-            >
-              {isLoadingPatients ? (
-                <option value="">Cargando pacientes...</option>
-              ) : null}
-
-              {!isLoadingPatients && patients.length === 0 ? (
-                <option value="">No hay pacientes disponibles</option>
-              ) : null}
-
-              {!isLoadingPatients
-                ? patients
-                    .filter((patient) => patient.patient)
-                    .map((patient) => (
-                      <option key={patient.id} value={patient.patient?.id}>
-                        {patient.name} · {patient.email}
-                        {patient.patient?.birthDate
-                          ? ` · Nac. ${formatDate(patient.patient.birthDate)}`
-                          : ''}
-                      </option>
-                    ))
-                : null}
-            </select>
-          </label>
-
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-700">
-              Notas generales
-            </span>
-            <textarea
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-              rows={4}
-              placeholder="Indicaciones generales para el paciente..."
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
-            />
-          </label>
-
-          <div className="space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <Card className="p-5 sm:p-6">
+            <div className="mb-5 flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-800">
+                👤
+              </div>
               <div>
-                <h3 className="font-semibold text-slate-950">Medicamentos</h3>
-                <p className="text-sm text-slate-600">
-                  Agrega uno o más medicamentos a la prescripción.
+                <h2 className="text-xl font-extrabold text-slate-950">
+                  Información del paciente
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Selecciona el paciente existente al que se asignará la
+                  prescripción.
                 </p>
               </div>
-
-              <Button type="button" variant="secondary" onClick={addItem}>
-                Agregar medicamento
-              </Button>
             </div>
 
-            {items.map((item, index) => (
-              <div
-                key={index}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+            <label className="block space-y-1.5">
+              <span className="text-sm font-semibold text-slate-800">
+                Paciente
+              </span>
+
+              <select
+                value={patientId}
+                onChange={(event) => setPatientId(event.target.value)}
+                disabled={isLoadingPatients || patients.length === 0}
+                required
+                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950 shadow-sm outline-none transition focus:border-blue-700 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
               >
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <h4 className="font-semibold text-slate-900">
-                    Medicamento {index + 1}
-                  </h4>
+                {isLoadingPatients ? (
+                  <option>Cargando pacientes...</option>
+                ) : null}
 
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={items.length === 1}
-                    onClick={() => removeItem(index)}
-                  >
-                    Quitar
-                  </Button>
-                </div>
+                {!isLoadingPatients && patients.length === 0 ? (
+                  <option>No hay pacientes disponibles</option>
+                ) : null}
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Input
-                    label="Nombre del medicamento"
-                    name={`medicineName-${index}`}
-                    value={item.medicineName}
-                    onChange={(event) => updateItem(index, 'medicineName', event)}
-                    required
-                  />
+                {!isLoadingPatients
+                  ? patients
+                      .filter((patient) => patient.patient)
+                      .map((patient) => (
+                        <option
+                          key={patient.id}
+                          value={patient.patient?.id ?? ''}
+                        >
+                          {patient.name} · {patient.email}
+                          {patient.patient?.birthDate
+                            ? ` · Nac. ${formatDate(patient.patient.birthDate)}`
+                            : ''}
+                        </option>
+                      ))
+                  : null}
+              </select>
+            </label>
+          </Card>
 
-                  <Input
-                    label="Dosis"
-                    name={`dosage-${index}`}
-                    value={item.dosage}
-                    onChange={(event) => updateItem(index, 'dosage', event)}
-                    placeholder="500 mg"
-                    required
-                  />
+          <Card className="p-5 sm:p-6">
+            <div className="mb-5 flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-800">
+                ✎
+              </div>
+              <div>
+                <h2 className="text-xl font-extrabold text-slate-950">
+                  Notas generales
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Agrega observaciones o indicaciones generales para el
+                  paciente.
+                </p>
+              </div>
+            </div>
 
-                  <Input
-                    label="Frecuencia"
-                    name={`frequency-${index}`}
-                    value={item.frequency}
-                    onChange={(event) => updateItem(index, 'frequency', event)}
-                    placeholder="Cada 8 horas"
-                    required
-                  />
+            <label className="block space-y-1.5">
+              <span className="text-sm font-semibold text-slate-800">
+                Notas
+              </span>
 
-                  <Input
-                    label="Duración"
-                    name={`duration-${index}`}
-                    value={item.duration}
-                    onChange={(event) => updateItem(index, 'duration', event)}
-                    placeholder="3 días"
-                    required
-                  />
+              <textarea
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                rows={4}
+                placeholder="Indicaciones generales para el paciente..."
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
+              />
+            </label>
+          </Card>
 
-                  <div className="md:col-span-2">
-                    <Input
-                      label="Instrucciones"
-                      name={`instructions-${index}`}
-                      value={item.instructions}
-                      onChange={(event) => updateItem(index, 'instructions', event)}
-                      placeholder="Tomar después de comer"
-                    />
+          <Card className="overflow-hidden">
+            <div className="border-b border-slate-200 bg-white p-5 sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-800">
+                    ✚
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-extrabold text-slate-950">
+                      Medicamentos
+                    </h2>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                      Agrega uno o más medicamentos con dosis, frecuencia y
+                      duración.
+                    </p>
                   </div>
                 </div>
+
+                <Button type="button" variant="secondary" onClick={addItem}>
+                  Agregar medicamento
+                </Button>
               </div>
-            ))}
-          </div>
+            </div>
+
+            <div className="space-y-4 bg-slate-50 p-5 sm:p-6">
+              {items.map((item, index) => (
+                <section
+                  key={index}
+                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                >
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold text-slate-950">
+                        Medicamento {index + 1}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Completa los campos obligatorios de este ítem.
+                      </p>
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={items.length === 1}
+                      onClick={() => removeItem(index)}
+                    >
+                      Quitar
+                    </Button>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Input
+                      label="Nombre del medicamento"
+                      name={`medicineName-${index}`}
+                      value={item.medicineName}
+                      onChange={(event) =>
+                        updateItem(index, 'medicineName', event)
+                      }
+                      placeholder="Ej. Amoxicilina 500 mg"
+                      required
+                    />
+
+                    <Input
+                      label="Dosis"
+                      name={`dosage-${index}`}
+                      value={item.dosage}
+                      onChange={(event) => updateItem(index, 'dosage', event)}
+                      placeholder="500 mg"
+                      required
+                    />
+
+                    <Input
+                      label="Frecuencia"
+                      name={`frequency-${index}`}
+                      value={item.frequency}
+                      onChange={(event) =>
+                        updateItem(index, 'frequency', event)
+                      }
+                      placeholder="Cada 8 horas"
+                      required
+                    />
+
+                    <Input
+                      label="Duración"
+                      name={`duration-${index}`}
+                      value={item.duration}
+                      onChange={(event) =>
+                        updateItem(index, 'duration', event)
+                      }
+                      placeholder="3 días"
+                      required
+                    />
+
+                    <div className="md:col-span-2">
+                      <Input
+                        label="Instrucciones"
+                        name={`instructions-${index}`}
+                        value={item.instructions}
+                        onChange={(event) =>
+                          updateItem(index, 'instructions', event)
+                        }
+                        placeholder="Tomar después de comer"
+                      />
+                    </div>
+                  </div>
+                </section>
+              ))}
+
+              <button
+                type="button"
+                onClick={addItem}
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-blue-200 bg-white px-4 py-3 text-sm font-bold text-blue-800 transition hover:border-blue-400 hover:bg-blue-50"
+              >
+                + Añadir otro medicamento
+              </button>
+            </div>
+          </Card>
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button
@@ -308,7 +380,7 @@ export default function NewPrescriptionPage() {
             </Button>
           </div>
         </form>
-      </Card>
+      </div>
     </AppShell>
   );
 }
