@@ -33,10 +33,8 @@ El proyecto fue construido con enfoque MVP: una entrega funcional, clara, demost
 |---|---|
 | Frontend | https://prescripciones-mvp.vercel.app |
 | Backend API | https://prescripciones-mvp.onrender.com |
-| Swagger / OpenAPI | `http://localhost:3001/api/docs` |
+| Swagger / OpenAPI | https://prescripciones-mvp.onrender.com/api/docs |
 | Repositorio | https://github.com/CristoferGuillen/prescripciones-mvp |
-
-> La documentación Swagger queda disponible en local en `/api/docs` y estará disponible en producción después de publicar los últimos cambios del backend.
 
 ### Credenciales demo
 

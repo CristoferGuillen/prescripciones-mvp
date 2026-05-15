@@ -26,8 +26,8 @@ La API está desplegada en Render y conectada a una base de datos PostgreSQL ges
 | Recurso | URL |
 |---|---|
 | API pública | https://prescripciones-mvp.onrender.com |
-| Swagger local | http://localhost:3001/api/docs |
-| Health local | http://localhost:3001/health |
+| Swagger  | https://prescripciones-mvp.onrender.com/api/docs |
+| Health  | https://prescripciones-mvp.onrender.com/health |
 | Repositorio | https://github.com/CristoferGuillen/prescripciones-mvp |
 
 > La ruta `/auth/profile` responde `401 Unauthorized` sin token. Ese comportamiento es esperado y confirma que la API está viva y protegida.
