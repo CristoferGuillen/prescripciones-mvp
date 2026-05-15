@@ -1,10 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+
 import { AppShell } from '../../components/layout/AppShell';
 import { Alert } from '../../components/ui/Alert';
 import { Button } from '../../components/ui/Button';
-import { Card, CardHeader } from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { apiFetch } from '../../lib/api';
 import { getSession } from '../../lib/session';
 import type { AdminMetrics } from '../../types/admin';
@@ -63,6 +65,7 @@ export default function AdminPage() {
     pendingPrescriptions,
     totalPrescriptions,
   );
+
   const consumedPercentage = calculatePercentage(
     consumedPrescriptions,
     totalPrescriptions,
@@ -77,212 +80,236 @@ export default function AdminPage() {
 
   return (
     <AppShell
-      title="Panel administrador"
-      description="Dashboard operativo con métricas generales del sistema."
+      title="Panel administrativo"
+      description="Resumen ejecutivo del comportamiento general del sistema."
       allowedRoles={['ADMIN']}
     >
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-950">
-            Métricas del sistema
-          </h2>
-          <p className="text-sm text-slate-600">
-            Totales, estados, comportamiento diario y resumen operativo.
-          </p>
-
-          {lastUpdatedAt ? (
-            <p className="mt-1 text-xs text-slate-500">
-              Última actualización: {lastUpdatedAt}
+      <div className="space-y-6">
+        <section className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-blue-700">
+              Administración
             </p>
-          ) : null}
-        </div>
 
-        <Button
-          variant="secondary"
-          onClick={() => loadMetrics({ refreshing: true })}
-          disabled={isLoading || isRefreshing}
-        >
-          {isRefreshing ? 'Actualizando...' : 'Actualizar métricas'}
-        </Button>
-      </div>
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">
+              Métricas del sistema
+            </h2>
 
-      {isLoading ? (
-        <Card>
-          <p className="text-sm text-slate-600">Cargando métricas...</p>
-        </Card>
-      ) : null}
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+              Totales, estados y actividad diaria de las prescripciones
+              registradas.
+            </p>
 
-      {error ? (
-        <Alert variant="error" className="mb-5">
-          {error}
-        </Alert>
-      ) : null}
+            {lastUpdatedAt ? (
+              <p className="mt-2 text-xs font-medium text-slate-500">
+                Última actualización: {lastUpdatedAt}
+              </p>
+            ) : null}
+          </div>
 
-      {!isLoading && !error && metrics ? (
-        <div className="space-y-6">
-          <section className="grid gap-4 md:grid-cols-3">
-            <MetricCard
-              title="Médicos"
-              value={metrics.totals.doctors}
-              description="Perfiles médicos disponibles para crear prescripciones."
-            />
+          <Button
+            variant="secondary"
+            onClick={() => loadMetrics({ refreshing: true })}
+            disabled={isLoading || isRefreshing}
+          >
+            {isRefreshing ? 'Actualizando...' : 'Actualizar métricas'}
+          </Button>
+        </section>
 
-            <MetricCard
-              title="Pacientes"
-              value={metrics.totals.patients}
-              description="Pacientes disponibles para recibir prescripciones."
-            />
+        {isLoading ? (
+          <Card className="px-5 py-8 text-center text-sm font-medium text-slate-600">
+            Cargando métricas...
+          </Card>
+        ) : null}
 
-            <MetricCard
-              title="Prescripciones"
-              value={metrics.totals.prescriptions}
-              description="Total de prescripciones registradas en el sistema."
-            />
-          </section>
+        {error ? <Alert variant="error">{error}</Alert> : null}
 
-          <section className="grid gap-6 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
-              <CardHeader
-                title="Prescripciones por estado"
-                description="Distribución actual entre recetas pendientes y consumidas."
+        {!isLoading && !error && metrics ? (
+          <>
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <MetricCard
+                title="Médicos"
+                value={metrics.totals.doctors}
+                description="Profesionales registrados"
+                icon="✚"
+                tone="blue"
               />
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <StatusMetric
-                  label="Pendientes"
-                  value={pendingPrescriptions}
-                  percentage={pendingPercentage}
-                  tone="pending"
-                />
+              <MetricCard
+                title="Pacientes"
+                value={metrics.totals.patients}
+                description="Usuarios con rol paciente"
+                icon="👤"
+                tone="slate"
+              />
 
-                <StatusMetric
-                  label="Consumidas"
-                  value={consumedPrescriptions}
-                  percentage={consumedPercentage}
-                  tone="consumed"
-                />
-              </div>
+              <MetricCard
+                title="Prescripciones"
+                value={metrics.totals.prescriptions}
+                description="Total de recetas creadas"
+                icon="▤"
+                tone="blue"
+              />
 
-              <div className="mt-5">
-                <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
-                  <span>Progreso de consumo</span>
-                  <span className="font-semibold text-slate-900">
-                    {consumedPercentage}% consumidas
-                  </span>
+              <MetricCard
+                title="Pendientes"
+                value={metrics.byStatus.pending}
+                description="Recetas aún no consumidas"
+                icon="●"
+                tone="amber"
+              />
+            </section>
+
+            <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+              <Card className="overflow-hidden">
+                <div className="border-b border-slate-200 bg-white px-5 py-5">
+                  <h3 className="text-lg font-extrabold text-slate-950">
+                    Estado de prescripciones
+                  </h3>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Relación entre prescripciones pendientes y consumidas.
+                  </p>
                 </div>
 
-                <div className="h-4 overflow-hidden rounded-full bg-amber-100 ring-1 ring-amber-200">
-                  <div
-                    className="h-full rounded-full bg-emerald-500 transition-all"
-                    style={{
-                      width: `${consumedPercentage}%`,
-                    }}
+                <div className="space-y-5 p-5">
+                  <div className="overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-4 rounded-full bg-emerald-500 transition-all"
+                      style={{
+                        width: `${consumedPercentage}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <StatusMetric
+                      label="Consumidas"
+                      value={consumedPrescriptions}
+                      percentage={consumedPercentage}
+                      tone="consumed"
+                    />
+
+                    <StatusMetric
+                      label="Pendientes"
+                      value={pendingPrescriptions}
+                      percentage={pendingPercentage}
+                      tone="pending"
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-5">
+                <h3 className="text-lg font-extrabold text-slate-950">
+                  Resumen operativo
+                </h3>
+
+                <div className="mt-5 space-y-3">
+                  <SummaryRow
+                    label="Días con actividad"
+                    value={metrics.byDay.length}
+                  />
+
+                  <SummaryRow
+                    label="Promedio por día"
+                    value={averagePerDay}
+                  />
+
+                  <SummaryRow
+                    label="Mayor actividad"
+                    value={
+                      highestDay
+                        ? `${highestDay.count} el ${formatDayLabel(
+                            highestDay.date,
+                          )}`
+                        : 'Sin datos'
+                    }
+                  />
+
+                  <SummaryRow
+                    label="Total del periodo"
+                    value={metrics.totals.prescriptions}
                   />
                 </div>
+              </Card>
+            </section>
 
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                  <span>Consumidas: {consumedPercentage}%</span>
-                  <span>Pendientes: {pendingPercentage}%</span>
-                </div>
-              </div>
-            </Card>
+            <Card className="overflow-hidden">
+              <div className="border-b border-slate-200 bg-white px-5 py-5">
+                <h3 className="text-lg font-extrabold text-slate-950">
+                  Actividad diaria
+                </h3>
 
-            <Card>
-              <CardHeader
-                title="Resumen operativo"
-                description="Lectura rápida del estado actual."
-              />
-
-              <div className="space-y-3">
-                <SummaryRow
-                  label="Total de recetas"
-                  value={metrics.totals.prescriptions}
-                />
-                <SummaryRow label="Pendientes" value={pendingPrescriptions} />
-                <SummaryRow label="Consumidas" value={consumedPrescriptions} />
-                <SummaryRow label="Promedio diario" value={averagePerDay} />
-                <SummaryRow
-                  label="Día con más recetas"
-                  value={
-                    highestDay
-                      ? `${formatDayLabel(highestDay.date)} · ${highestDay.count}`
-                      : 'Sin datos'
-                  }
-                />
-              </div>
-            </Card>
-          </section>
-
-          <Card>
-            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <CardHeader
-                title="Prescripciones por día"
-                description="Conteo diario calculado desde backend."
-              />
-
-              <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                Días con actividad:{' '}
-                <span className="font-semibold text-slate-950">
-                  {metrics.byDay.length}
-                </span>
-              </div>
-            </div>
-
-            {metrics.byDay.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
-                <p className="font-medium text-slate-900">No hay datos diarios</p>
-                <p className="mt-1 text-sm text-slate-600">
-                  Cuando existan prescripciones, aparecerán en esta tabla.
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Cantidad de prescripciones registradas por fecha.
                 </p>
               </div>
-            ) : (
-              <div className="overflow-hidden rounded-xl border border-slate-200">
-                <table className="w-full border-collapse text-left text-sm">
-                  <thead className="bg-slate-50 text-slate-600">
-                    <tr>
-                      <th className="px-4 py-3 font-semibold">Fecha</th>
-                      <th className="px-4 py-3 font-semibold">Cantidad</th>
-                      <th className="px-4 py-3 font-semibold">Participación</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {metrics.byDay.map((row) => {
-                      const dayPercentage = calculatePercentage(
-                        row.count,
-                        totalPrescriptions,
-                      );
 
-                      return (
-                        <tr key={row.date} className="border-t border-slate-200">
-                          <td className="px-4 py-3 font-medium text-slate-950">
-                            {formatDayLabel(row.date)}
-                          </td>
-                          <td className="px-4 py-3 text-slate-700">{row.count}</td>
-                          <td className="px-4 py-3 text-slate-700">
-                            <div className="flex items-center gap-3">
-                              <div className="h-2 w-28 overflow-hidden rounded-full bg-slate-100">
-                                <div
-                                  className="h-full rounded-full bg-slate-700"
-                                  style={{
-                                    width: `${dayPercentage}%`,
-                                  }}
-                                />
+              {metrics.byDay.length === 0 ? (
+                <div className="p-5">
+                  <EmptyState
+                    title="No hay datos diarios"
+                    description="Cuando existan prescripciones, aparecerán en esta tabla."
+                  />
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-[640px] w-full text-left">
+                    <thead className="bg-slate-50">
+                      <tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                        <th className="px-5 py-3">Fecha</th>
+                        <th className="px-5 py-3">Cantidad</th>
+                        <th className="px-5 py-3">Participación</th>
+                      </tr>
+                    </thead>
+
+                    <tbody className="divide-y divide-slate-200 bg-white">
+                      {metrics.byDay.map((row) => {
+                        const dayPercentage = calculatePercentage(
+                          row.count,
+                          totalPrescriptions,
+                        );
+
+                        return (
+                          <tr
+                            key={row.date}
+                            className="transition hover:bg-slate-50"
+                          >
+                            <td className="px-5 py-4 text-sm font-semibold text-slate-900">
+                              {formatDayLabel(row.date)}
+                            </td>
+
+                            <td className="px-5 py-4 text-sm text-slate-700">
+                              {row.count}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="h-2 w-32 overflow-hidden rounded-full bg-slate-100">
+                                  <div
+                                    className="h-full rounded-full bg-blue-700"
+                                    style={{
+                                      width: `${dayPercentage}%`,
+                                    }}
+                                  />
+                                </div>
+
+                                <span className="text-sm font-semibold text-slate-700">
+                                  {dayPercentage}%
+                                </span>
                               </div>
-                              <span className="text-xs font-medium text-slate-600">
-                                {dayPercentage}%
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
-        </div>
-      ) : null}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Card>
+          </>
+        ) : null}
+      </div>
     </AppShell>
   );
 }
@@ -291,14 +318,45 @@ type MetricCardProps = {
   title: string;
   value: number;
   description: string;
+  icon: string;
+  tone: 'blue' | 'slate' | 'amber';
 };
 
-function MetricCard({ title, value, description }: MetricCardProps) {
+function MetricCard({
+  title,
+  value,
+  description,
+  icon,
+  tone,
+}: MetricCardProps) {
+  const toneClasses: Record<MetricCardProps['tone'], string> = {
+    blue: 'bg-blue-50 text-blue-800 ring-blue-100',
+    slate: 'bg-slate-100 text-slate-700 ring-slate-200',
+    amber: 'bg-amber-50 text-amber-700 ring-amber-200',
+  };
+
   return (
-    <Card>
-      <p className="text-sm font-medium text-slate-500">{title}</p>
-      <p className="mt-3 text-4xl font-bold text-slate-950">{value}</p>
-      <p className="mt-2 text-sm text-slate-600">{description}</p>
+    <Card className="p-5">
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div
+          className={[
+            'flex h-11 w-11 items-center justify-center rounded-2xl text-lg ring-1',
+            toneClasses[tone],
+          ].join(' ')}
+        >
+          {icon}
+        </div>
+      </div>
+
+      <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">
+        {title}
+      </p>
+
+      <p className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">
+        {formatNumber(value)}
+      </p>
+
+      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
     </Card>
   );
 }
@@ -318,10 +376,11 @@ function StatusMetric({ label, value, percentage, tone }: StatusMetricProps) {
 
   return (
     <div className={['rounded-2xl border p-4', classes].join(' ')}>
-      <p className="text-sm font-medium">{label}</p>
+      <p className="text-sm font-bold">{label}</p>
+
       <div className="mt-2 flex items-end justify-between gap-3">
-        <p className="text-3xl font-bold">{value}</p>
-        <p className="text-sm font-semibold">{percentage}%</p>
+        <p className="text-3xl font-extrabold">{formatNumber(value)}</p>
+        <p className="text-sm font-bold">{percentage}%</p>
       </div>
     </div>
   );
@@ -334,9 +393,9 @@ type SummaryRowProps = {
 
 function SummaryRow({ label, value }: SummaryRowProps) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 text-sm">
-      <span className="text-slate-600">{label}</span>
-      <span className="text-right font-semibold text-slate-950">{value}</span>
+    <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 px-4 py-3">
+      <span className="text-sm font-medium text-slate-600">{label}</span>
+      <span className="text-sm font-extrabold text-slate-950">{value}</span>
     </div>
   );
 }
@@ -374,11 +433,15 @@ function formatDayLabel(value: string) {
 }
 
 function formatDateTimeLabel(date: Date) {
-  return new Intl.DateTimeFormat('es-DO', {
+  return new Intl.DateTimeFormat('es-CO', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat('es-CO').format(value);
 }
