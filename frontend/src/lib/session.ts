@@ -30,8 +30,26 @@ export function getSession(): StoredSession | null {
   }
 }
 
+export function updateSessionTokens(accessToken: string, refreshToken: string) {
+  const currentSession = getSession();
+
+  if (!currentSession) {
+    return;
+  }
+
+  saveSession({
+    ...currentSession,
+    accessToken,
+    refreshToken,
+  });
+}
+
 export function getAccessToken() {
   return getSession()?.accessToken ?? null;
+}
+
+export function getRefreshToken() {
+  return getSession()?.refreshToken ?? null;
 }
 
 export function getCurrentUser(): AuthUser | null {

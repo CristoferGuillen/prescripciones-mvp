@@ -15,6 +15,16 @@ export type LoginResponse = {
   user: AuthUser;
 };
 
+export type RefreshResponse = {
+  accessToken: string;
+  refreshToken: string;
+  user: AuthUser;
+};
+
+export type LogoutResponse = {
+  message: string;
+};
+
 export type StoredSession = {
   accessToken: string;
   refreshToken: string;

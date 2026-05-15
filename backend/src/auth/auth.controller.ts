@@ -32,7 +32,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Iniciar sesión',
     description:
-      'Valida las credenciales del usuario y devuelve access token, refresh token y datos seguros del usuario.',
+      'Valida las credenciales del usuario, devuelve access token, refresh token y guarda el refresh token de forma segura en base de datos.',
   })
   @ApiBody({
     type: LoginDto,
@@ -73,18 +73,19 @@ export class AuthController {
   })
   @Post('refresh')
   @ApiOperation({
-    summary: 'Renovar access token',
+    summary: 'Rotar refresh token y renovar access token',
     description:
-      'Recibe un refresh token válido y devuelve un nuevo access token junto con el usuario autenticado.',
+      'Recibe un refresh token válido, revoca el refresh token anterior y devuelve un nuevo access token junto con un nuevo refresh token.',
   })
   @ApiBody({
     type: RefreshTokenDto,
   })
   @ApiOkResponse({
-    description: 'Token renovado correctamente.',
+    description: 'Tokens renovados correctamente.',
     schema: {
       example: {
         accessToken: 'new.access.jwt.token',
+        refreshToken: 'new.refresh.jwt.token',
         user: {
           id: 'user-id',
           email: 'patient@test.com',
@@ -97,7 +98,7 @@ export class AuthController {
     },
   })
   @ApiUnauthorizedResponse({
-    description: 'Refresh token inválido o expirado.',
+    description: 'Refresh token inválido, expirado o revocado.',
   })
   @ApiTooManyRequestsResponse({
     description:
@@ -105,6 +106,39 @@ export class AuthController {
   })
   refresh(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refresh(refreshTokenDto);
+  }
+
+  @Throttle({
+    default: {
+      limit: 10,
+      ttl: 60000,
+    },
+  })
+  @Post('logout')
+  @ApiOperation({
+    summary: 'Cerrar sesión',
+    description:
+      'Revoca el refresh token enviado en el cuerpo de la solicitud. Después del logout, ese refresh token no puede volver a usarse.',
+  })
+  @ApiBody({
+    type: RefreshTokenDto,
+  })
+  @ApiOkResponse({
+    description: 'Sesión cerrada correctamente.',
+    schema: {
+      example: {
+        message: 'Sesión cerrada correctamente',
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Refresh token inválido, expirado o revocado.',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Demasiadas solicitudes. Intenta nuevamente más tarde.',
+  })
+  logout(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.authService.logout(refreshTokenDto);
   }
 
   @UseGuards(JwtAuthGuard)
